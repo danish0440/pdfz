@@ -1,6 +1,6 @@
 [package]
-name = "pdfcraft-engine"
-description = "PdfCraft engine façade: session, documents, command/tool catalogue"
+name = "pdfz-engine"
+description = "PdfZ engine façade: session, documents, command/tool catalogue"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,31 +9,31 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-pdfcraft-measure = { workspace = true }
+pdfz-measure = { workspace = true }
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "tiff"] }
-pdfcraft-render = { workspace = true }
-pdfcraft-cos = { workspace = true }
-pdfcraft-organize = { workspace = true }
-pdfcraft-annot = { workspace = true }
-pdfcraft-forms = { workspace = true }
-pdfcraft-xfa = { workspace = true }
-pdfcraft-edit = { workspace = true }
-pdfcraft-audit = { workspace = true }
-pdfcraft-redact = { workspace = true }
-pdfcraft-print = { workspace = true }
-pdfcraft-xfdf = { workspace = true }
-pdfcraft-sign = { workspace = true }
-pdfcraft-optimize = { workspace = true }
-pdfcraft-a11y = { workspace = true }
-pdfcraft-ocr = { workspace = true }
-pdfcraft-js = { workspace = true }
-pdfcraft-compare = { workspace = true }
-pdfcraft-preflight = { workspace = true }
-pdfcraft-export = { workspace = true }
-pdfcraft-fonts = { workspace = true }
-pdfcraft-create = { workspace = true }
-pdfcraft-model = { workspace = true }
-pdfcraft-geom = { workspace = true }
+pdfz-render = { workspace = true }
+pdfz-cos = { workspace = true }
+pdfz-organize = { workspace = true }
+pdfz-annot = { workspace = true }
+pdfz-forms = { workspace = true }
+pdfz-xfa = { workspace = true }
+pdfz-edit = { workspace = true }
+pdfz-audit = { workspace = true }
+pdfz-redact = { workspace = true }
+pdfz-print = { workspace = true }
+pdfz-xfdf = { workspace = true }
+pdfz-sign = { workspace = true }
+pdfz-optimize = { workspace = true }
+pdfz-a11y = { workspace = true }
+pdfz-ocr = { workspace = true }
+pdfz-js = { workspace = true }
+pdfz-compare = { workspace = true }
+pdfz-preflight = { workspace = true }
+pdfz-export = { workspace = true }
+pdfz-fonts = { workspace = true }
+pdfz-create = { workspace = true }
+pdfz-model = { workspace = true }
+pdfz-geom = { workspace = true }
 thiserror = { workspace = true }
 png = "0.18"
 # Already in the graph (url and idna through webbrowser, icu_properties through boa): they show

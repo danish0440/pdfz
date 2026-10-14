@@ -3874,15 +3874,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft"
+name = "pdfz"
 version = "0.7.1"
 dependencies = [
  "eframe",
  "egui",
  "fmv-macos-events",
  "log",
- "pdfcraft-engine",
- "pdfcraft-ui-egui",
+ "pdfz-engine",
+ "pdfz-ui-egui",
  "pollster 1.0.1",
  "rustls-native-certs",
  "serde_json",
@@ -3896,54 +3896,54 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-a11y"
+name = "pdfz-a11y"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-filters",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-filters",
+ "pdfz-fonts",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-annot"
+name = "pdfz-annot"
 version = "0.7.1"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "pdfz-cos",
+ "pdfz-fonts",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-audit"
+name = "pdfz-audit"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-edit",
- "pdfcraft-model",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-edit",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-automation"
+name = "pdfz-automation"
 version = "0.7.1"
 dependencies = [
  "base64 0.22.1",
  "flate2",
  "image",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-fonts",
- "pdfcraft-model",
- "pdfcraft-organize",
- "pdfcraft-platform",
- "pdfcraft-render",
- "pdfcraft-xfa",
+ "pdfz-cos",
+ "pdfz-engine",
+ "pdfz-fonts",
+ "pdfz-model",
+ "pdfz-organize",
+ "pdfz-platform",
+ "pdfz-render",
+ "pdfz-xfa",
  "png 0.18.1",
  "serde_json",
  "sha2 0.11.0",
@@ -3951,53 +3951,53 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-cli"
+name = "pdfz-cli"
 version = "0.7.1"
 dependencies = [
  "base64 0.22.1",
- "pdfcraft-audit",
- "pdfcraft-automation",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-render",
+ "pdfz-audit",
+ "pdfz-automation",
+ "pdfz-cos",
+ "pdfz-engine",
+ "pdfz-render",
  "rustix 1.1.5",
  "serde_json",
  "winresource",
 ]
 
 [[package]]
-name = "pdfcraft-compare"
+name = "pdfz-compare"
 version = "0.7.1"
 
 [[package]]
-name = "pdfcraft-content"
+name = "pdfz-content"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-cos",
+ "pdfz-cos",
 ]
 
 [[package]]
-name = "pdfcraft-cos"
+name = "pdfz-cos"
 version = "0.7.1"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-crypt",
- "pdfcraft-filters",
+ "pdfz-crypt",
+ "pdfz-filters",
  "proptest",
  "serde_json",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-create"
+name = "pdfz-create"
 version = "0.7.1"
 dependencies = [
  "encoding_rs",
  "hayro-syntax",
  "image",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "pdfz-cos",
+ "pdfz-fonts",
+ "pdfz-model",
  "png 0.18.1",
  "thiserror 2.0.21",
  "tiff",
@@ -4005,7 +4005,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-crypt"
+name = "pdfz-crypt"
 version = "0.7.1"
 dependencies = [
  "aes",
@@ -4017,66 +4017,66 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-edit"
+name = "pdfz-edit"
 version = "0.7.1"
 dependencies = [
  "hayro-syntax",
  "kurbo 0.13.1",
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "pdfz-annot",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-fonts",
+ "pdfz-model",
  "thiserror 2.0.21",
  "unicode-bidi",
 ]
 
 [[package]]
-name = "pdfcraft-engine"
+name = "pdfz-engine"
 version = "0.7.1"
 dependencies = [
  "chrono",
  "icu_properties",
  "idna",
  "image",
- "pdfcraft-a11y",
- "pdfcraft-annot",
- "pdfcraft-audit",
- "pdfcraft-compare",
- "pdfcraft-cos",
- "pdfcraft-create",
- "pdfcraft-edit",
- "pdfcraft-export",
- "pdfcraft-fonts",
- "pdfcraft-forms",
- "pdfcraft-geom",
- "pdfcraft-js",
- "pdfcraft-measure",
- "pdfcraft-model",
- "pdfcraft-ocr",
- "pdfcraft-optimize",
- "pdfcraft-organize",
- "pdfcraft-preflight",
- "pdfcraft-print",
- "pdfcraft-redact",
- "pdfcraft-render",
- "pdfcraft-sign",
- "pdfcraft-xfa",
- "pdfcraft-xfdf",
+ "pdfz-a11y",
+ "pdfz-annot",
+ "pdfz-audit",
+ "pdfz-compare",
+ "pdfz-cos",
+ "pdfz-create",
+ "pdfz-edit",
+ "pdfz-export",
+ "pdfz-fonts",
+ "pdfz-forms",
+ "pdfz-geom",
+ "pdfz-js",
+ "pdfz-measure",
+ "pdfz-model",
+ "pdfz-ocr",
+ "pdfz-optimize",
+ "pdfz-organize",
+ "pdfz-preflight",
+ "pdfz-print",
+ "pdfz-redact",
+ "pdfz-render",
+ "pdfz-sign",
+ "pdfz-xfa",
+ "pdfz-xfdf",
  "png 0.18.1",
  "thiserror 2.0.21",
  "url",
 ]
 
 [[package]]
-name = "pdfcraft-export"
+name = "pdfz-export"
 version = "0.7.1"
 dependencies = [
  "flate2",
 ]
 
 [[package]]
-name = "pdfcraft-filters"
+name = "pdfz-filters"
 version = "0.7.1"
 dependencies = [
  "flate2",
@@ -4086,92 +4086,92 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-fonts"
+name = "pdfz-fonts"
 version = "0.7.1"
 dependencies = [
  "harfrust",
- "pdfcraft-cos",
+ "pdfz-cos",
  "skrifa 0.44.0",
  "unicode-bidi",
 ]
 
 [[package]]
-name = "pdfcraft-forms"
+name = "pdfz-forms"
 version = "0.7.1"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-fonts",
- "pdfcraft-model",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-fonts",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-geom"
+name = "pdfz-geom"
 version = "0.7.1"
 
 [[package]]
-name = "pdfcraft-js"
+name = "pdfz-js"
 version = "0.7.1"
 dependencies = [
  "boa_engine",
 ]
 
 [[package]]
-name = "pdfcraft-measure"
+name = "pdfz-measure"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
+ "pdfz-annot",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-model",
  "serde",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-model"
+name = "pdfz-model"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-cos",
+ "pdfz-cos",
 ]
 
 [[package]]
-name = "pdfcraft-ocr"
+name = "pdfz-ocr"
 version = "0.7.1"
 dependencies = [
  "ocrs",
- "pdfcraft-fonts",
+ "pdfz-fonts",
  "rten",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-optimize"
+name = "pdfz-optimize"
 version = "0.7.1"
 dependencies = [
  "image",
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
- "pdfcraft-render",
+ "pdfz-annot",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-model",
+ "pdfz-render",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-organize"
+name = "pdfz-organize"
 version = "0.7.1"
 dependencies = [
  "hayro-syntax",
- "pdfcraft-content",
- "pdfcraft-cos",
+ "pdfz-content",
+ "pdfz-cos",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-platform"
+name = "pdfz-platform"
 version = "0.7.1"
 dependencies = [
  "async-channel",
@@ -4180,40 +4180,40 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-preflight"
+name = "pdfz-preflight"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-cos",
- "pdfcraft-model",
+ "pdfz-cos",
+ "pdfz-model",
 ]
 
 [[package]]
-name = "pdfcraft-print"
+name = "pdfz-print"
 version = "0.7.1"
 dependencies = [
  "craft-print",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-model",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-redact"
+name = "pdfz-redact"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-content",
- "pdfcraft-cos",
- "pdfcraft-edit",
- "pdfcraft-fonts",
- "pdfcraft-forms",
- "pdfcraft-model",
+ "pdfz-annot",
+ "pdfz-content",
+ "pdfz-cos",
+ "pdfz-edit",
+ "pdfz-fonts",
+ "pdfz-forms",
+ "pdfz-model",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-render"
+name = "pdfz-render"
 version = "0.7.1"
 dependencies = [
  "bytemuck",
@@ -4224,15 +4224,15 @@ dependencies = [
  "kurbo 0.13.1",
  "log",
  "lopdf",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "pdfz-cos",
+ "pdfz-fonts",
  "serde",
  "skrifa 0.44.0",
  "thiserror 2.0.21",
 ]
 
 [[package]]
-name = "pdfcraft-sign"
+name = "pdfz-sign"
 version = "0.7.1"
 dependencies = [
  "aes",
@@ -4251,9 +4251,9 @@ dependencies = [
  "p384",
  "p521",
  "pbkdf2",
- "pdfcraft-annot",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "pdfz-annot",
+ "pdfz-cos",
+ "pdfz-fonts",
  "rc2",
  "ripemd",
  "rsa",
@@ -4266,7 +4266,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-ui-egui"
+name = "pdfz-ui-egui"
 version = "0.7.1"
 dependencies = [
  "arboard",
@@ -4284,13 +4284,13 @@ dependencies = [
  "objc2 0.6.4",
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
- "pdfcraft-cos",
- "pdfcraft-engine",
- "pdfcraft-fonts",
- "pdfcraft-model",
- "pdfcraft-platform",
- "pdfcraft-render",
- "pdfcraft-xfa",
+ "pdfz-cos",
+ "pdfz-engine",
+ "pdfz-fonts",
+ "pdfz-model",
+ "pdfz-platform",
+ "pdfz-render",
+ "pdfz-xfa",
  "png 0.18.1",
  "pollster 1.0.1",
  "rfd",
@@ -4308,25 +4308,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-web"
+name = "pdfz-web"
 version = "0.7.1"
 dependencies = [
  "eframe",
  "egui",
  "js-sys",
- "pdfcraft-ui-egui",
+ "pdfz-ui-egui",
  "wasm-bindgen-futures",
  "web-sys",
 ]
 
 [[package]]
-name = "pdfcraft-xfa"
+name = "pdfz-xfa"
 version = "0.7.1"
 dependencies = [
  "base64 0.22.1",
  "image",
- "pdfcraft-cos",
- "pdfcraft-fonts",
+ "pdfz-cos",
+ "pdfz-fonts",
  "png 0.18.1",
  "roxmltree",
  "sha2 0.11.0",
@@ -4334,13 +4334,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfcraft-xfdf"
+name = "pdfz-xfdf"
 version = "0.7.1"
 dependencies = [
- "pdfcraft-annot",
- "pdfcraft-cos",
- "pdfcraft-forms",
- "pdfcraft-model",
+ "pdfz-annot",
+ "pdfz-cos",
+ "pdfz-forms",
+ "pdfz-model",
  "roxmltree",
  "thiserror 2.0.21",
 ]

@@ -1,8 +1,8 @@
 //! State-based waits for native preparation, which completes between UI frames.
 use egui_kittest::Harness;
-use pdfcraft_ui_egui::PdfCraftApp;
+use pdfz_ui_egui::PdfZApp;
 
-pub fn wait_until(h: &mut Harness<'static, PdfCraftApp>, what: &str, ready: impl Fn(&PdfCraftApp) -> bool) {
+pub fn wait_until(h: &mut Harness<'static, PdfZApp>, what: &str, ready: impl Fn(&PdfZApp) -> bool) {
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
     loop {
         h.step();

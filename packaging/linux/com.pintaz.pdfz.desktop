@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=PdfZ
+GenericName=PDF Editor
+Comment=Read, organize, combine, split and secure PDFs
+Exec=pdfz %U
+TryExec=pdfz
+Icon=com.pintaz.pdfz
+Terminal=false
+StartupNotify=true
+StartupWMClass=com.pintaz.pdfz
+Categories=Office;Viewer;
+Keywords=pdf;viewer;editor;annotate;sign;forms;merge;split;
+MimeType=application/pdf;

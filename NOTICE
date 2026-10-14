@@ -58,3 +58,17 @@ dependencies change (plan/adr/0002, 0006).
 Vendored (vendor/, patched; see vendor/README.md):
 - hayro 0.7.1 — Apache-2.0 OR MIT, Copyright the hayro authors (licence files kept in vendor/hayro).
 - hayro-interpret 0.7.0 — Apache-2.0 OR MIT, Copyright the hayro authors (LICENSE-APACHE, LICENSE-MIT kept in vendor/hayro-interpret).
+
+
+----------------------------------------------------------------------------------------
+PdfZ (github.com/danish0440/pdfz)
+
+Based on PdfCraft by Storytold (ArtCraft), Apache-2.0. Changes by PINTAZ TECHNOLOGIES.
+
+PdfZ is a modified version of PdfCraft (https://github.com/storytold/pdfcraft). Changes made by
+PINTAZ TECHNOLOGIES (Malaysia), applied by .pintaz/rebrand.py on top of each upstream version:
+  - renamed to PdfZ (binaries, installers, bundle ids com.pintaz.*, data folders);
+  - the ArtCraft name, wordmark and marks removed (docs/brand/LICENSE-brand.txt), new Z icons;
+  - help/website links point to this fork; the About screen states the credit above;
+  - our own release and upstream-sync workflows (.github/workflows/*-z.yml).
+The licence files (LICENSE-MIT, LICENSE-APACHE) and all upstream copyright notices are unchanged.
