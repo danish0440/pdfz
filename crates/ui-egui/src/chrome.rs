@@ -290,7 +290,7 @@ pub fn tab_strip(app: &mut PdfZApp, ui: &mut egui::Ui) {
                         app.dialog = Some(Dialog::Shortcuts);
                     }
                     // One click to the community, from anywhere in the app.
-                    if widgets::ghost_button_sized(ui, "messages-square", "Discord", tab_h).on_hover_text(pdfz_engine::links::DISCORD).clicked() {
+                    if widgets::ghost_button_sized(ui, "messages-square", "Help", tab_h).on_hover_text(pdfz_engine::links::DISCORD).clicked() {
                         app.execute("help.discord");
                     }
                 });
