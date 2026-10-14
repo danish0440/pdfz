@@ -148,7 +148,7 @@ def phrase_rules(up_id: str, launcher: bool):
         (re.compile(r"ArtCraft on \{name\}"), lambda m: "{name}"),
         (re.compile(r"Visit getartcraft\.com"), lambda m: "Visit the project page"),
         (re.compile(r'tl!\("Discord"\)'), lambda m: 'tl!("Help")'),
-        (re.compile(r'(?<![\w(])"Discord"'), lambda m: '"Help"'),  # bare button label; the link goes to GitHub issues
+        (re.compile(r'(?<!\w)"Discord"'), lambda m: '"Help"'),  # bare button label; the link goes to GitHub issues
         (re.compile(r"ArtCraft apps\b"), lambda m: "Z apps"),
         (re.compile(r"ArtCraft(?=[A-Z][a-z])(?!Launcher)"), lambda m: "Z"),  # identifiers: ArtCraftApi -> ZApi, ArtCraftInstallDirDlg -> ZInstallDirDlg
     ]

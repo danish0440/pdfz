@@ -20,7 +20,7 @@ fn harness(setup: impl FnOnce(&mut PdfZApp) + 'static) -> Harness<'static, PdfZA
 #[test]
 fn discord_button_in_the_top_bar_opens_discord() {
     let mut h = harness(|_| {});
-    h.get_by_label("Discord").click();
+    h.get_by_label("Help").click();
     h.run_steps(2);
     assert_eq!(h.state().last_opened_url.as_deref(), Some(links::DISCORD));
     assert_eq!(links::DISCORD, "https://github.com/danish0440/pdfz/issues");
