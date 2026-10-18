@@ -16,6 +16,8 @@ pdfz-model = { workspace = true }
 pdfz-forms = { workspace = true }
 pdfz-edit = { workspace = true }
 pdfz-annot = { workspace = true }
+pdfz-xfa = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+pdfz-testkit = { workspace = true }

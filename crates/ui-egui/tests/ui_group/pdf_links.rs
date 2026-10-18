@@ -40,7 +40,7 @@ fn drag(h: &mut Harness<'static, PdfZApp>, a: Pos2, b: Pos2) {
 
 fn links(h: &Harness<'static, PdfZApp>) -> Vec<pdfz_engine::LinkItem> {
     let s = h.state();
-    s.session.get(s.views[0].id).unwrap().links.clone()
+    s.session.get(s.views[0].id).unwrap().links().to_vec()
 }
 
 #[test]

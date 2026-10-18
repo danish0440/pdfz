@@ -19,6 +19,7 @@ pdfz-engine = { workspace = true }
 pdfz-audit = { workspace = true }
 pdfz-cos = { workspace = true }
 pdfz-automation = { workspace = true }
+pdfz-platform = { workspace = true }
 base64 = "0.22"
 
 [target.'cfg(unix)'.dependencies]

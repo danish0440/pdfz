@@ -11,5 +11,6 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
+pdfz-content = { workspace = true }
 pdfz-cos = { workspace = true }
 pdfz-model = { workspace = true }

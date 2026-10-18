@@ -14,6 +14,8 @@ pdfz-filters = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+pdfz-oracle = { workspace = true }
+pdfz-testkit = { workspace = true }
 serde_json = { workspace = true }
 proptest = { workspace = true }
 hayro-syntax = { workspace = true }
