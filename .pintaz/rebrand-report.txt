@@ -1,5 +1,5 @@
 rebrand pdfcraft -> PdfZ
-about credit inserted in: ['crates/ui-egui/src/dialogs.rs (fallback, after line 1158)']
+about credit inserted in: ['crates/ui-egui/src/dialogs.rs (fallback, after line 1161)']
 launcher patches: []
 lines still naming ArtCraft/getartcraft/discord (non-doc): 56
 ATTRIBUTION.toml:2716: title = "ArtCraft brand: artcraft-logo-white"
@@ -52,8 +52,8 @@ ATTRIBUTION.toml:3096: usage = "README: tool catalogue. Shows PdfZ UI, Lucide ic
 crates/ui-egui/tests/ui_group/links.rs:2: //! home screen open the ArtCraft and PdfZ pages.
 crates/ui-egui/src/widgets.rs:502: /// The ArtCraft wordmark (Storyteller's brand, docs/brand/; not open source), sized to `height`.
 crates/ui-egui/src/widgets.rs:513: /// The ArtCraft mark (brand blue, works on light and dark), `size` points square.
-crates/ui-egui/src/dialogs.rs:1159: // PINTAZ-ABOUT: required credit (Apache-2.0 change notice; ArtCraft brand licence)
-crates/ui-egui/src/dialogs.rs:1161: ui.label("Based on PdfCraft by Storytold (ArtCraft), Apache-2.0. Changes by PINTAZ TECHNOLOGIES.");
+crates/ui-egui/src/dialogs.rs:1162: // PINTAZ-ABOUT: required credit (Apache-2.0 change notice; ArtCraft brand licence)
+crates/ui-egui/src/dialogs.rs:1164: ui.label("Based on PdfCraft by Storytold (ArtCraft), Apache-2.0. Changes by PINTAZ TECHNOLOGIES.");
 crates/engine/src/links.rs:7: /// The app's name in ArtCraft URLs (`getartcraft.com/apps/{APP}`, `github.com/storytold/{APP}`).
 xtask/src/screenshots.rs:109: // The home screen shows the ArtCraft mark: say so (it is a Storyteller trademark, not open
 xtask/src/screenshots.rs:113: "Shows PdfZ UI, Lucide icons, the showcase PDF built from the [[fetched]] OFL fonts, and the ArtCraft mark (Storyteller trademark from docs/brand/, not covered 

@@ -111,6 +111,11 @@
              Resource 1 is the app's lion; resource 2 is the PDF document (build.rs). -->
         <RegistryValue Root="HKLM" Key="Software\Classes\PdfZ.Document\DefaultIcon" Value="&quot;[#PdfzExe]&quot;,-2" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\PdfZ.Document\shell\open\command" Value="&quot;[#PdfzExe]&quot; &quot;%1&quot;" Type="string" />
+        <!-- No overlay on thumbnails and in the preview pane: without TypeOverlay, Windows paints
+             the default program's icon (the lion) over the lower-right corner of every PDF
+             thumbnail, covering part of the page. An empty string means none ("Thumbnail
+             Handlers", Microsoft Learn). -->
+        <RegistryValue Root="HKLM" Key="Software\Classes\PdfZ.Document" Name="TypeOverlay" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\.pdf\OpenWithProgids" Name="PdfZ.Document" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\Applications\pdfz.exe" Name="FriendlyAppName" Value="PdfZ" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\Applications\pdfz.exe\DefaultIcon" Value="&quot;[#PdfzExe]&quot;,-2" Type="string" />
