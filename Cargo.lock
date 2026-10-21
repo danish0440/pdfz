@@ -3938,7 +3938,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "craft-quit",
  "eframe",
@@ -3963,7 +3963,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-a11y"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-content",
  "pdfz-cos",
@@ -3975,7 +3975,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-annot"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "hayro-syntax",
  "pdfz-cos",
@@ -3986,7 +3986,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-audit"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-content",
  "pdfz-cos",
@@ -3997,7 +3997,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-automation"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "base64 0.22.1",
  "flate2",
@@ -4018,7 +4018,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-cli"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "base64 0.22.1",
  "pdfz-audit",
@@ -4035,18 +4035,18 @@ dependencies = [
 
 [[package]]
 name = "pdfz-compare"
-version = "0.9.0"
+version = "0.10.1"
 
 [[package]]
 name = "pdfz-content"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-cos",
 ]
 
 [[package]]
 name = "pdfz-cos"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "hayro-syntax",
  "pdfz-crypt",
@@ -4060,7 +4060,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-create"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "encoding_rs",
  "hayro-syntax",
@@ -4076,7 +4076,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-crypt"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "aes",
  "md-5",
@@ -4088,7 +4088,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-edit"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "hayro-syntax",
  "kurbo 0.13.1",
@@ -4103,7 +4103,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-engine"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "chrono",
  "craft-docpath",
@@ -4143,14 +4143,14 @@ dependencies = [
 
 [[package]]
 name = "pdfz-export"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "flate2",
 ]
 
 [[package]]
 name = "pdfz-filters"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "flate2",
  "proptest",
@@ -4160,7 +4160,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-fonts"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "harfrust",
  "pdfz-cos",
@@ -4170,7 +4170,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-forms"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "hayro-syntax",
  "pdfz-content",
@@ -4182,18 +4182,18 @@ dependencies = [
 
 [[package]]
 name = "pdfz-geom"
-version = "0.9.0"
+version = "0.10.1"
 
 [[package]]
 name = "pdfz-js"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "boa_engine",
 ]
 
 [[package]]
 name = "pdfz-measure"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-annot",
  "pdfz-content",
@@ -4206,14 +4206,14 @@ dependencies = [
 
 [[package]]
 name = "pdfz-model"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-cos",
 ]
 
 [[package]]
 name = "pdfz-ocr"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "ocrs",
  "pdfz-fonts",
@@ -4223,7 +4223,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-optimize"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "image",
  "pdfz-annot",
@@ -4236,11 +4236,11 @@ dependencies = [
 
 [[package]]
 name = "pdfz-oracle"
-version = "0.9.0"
+version = "0.10.1"
 
 [[package]]
 name = "pdfz-organize"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "hayro-syntax",
  "pdfz-content",
@@ -4251,7 +4251,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-platform"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "async-channel",
  "futures-lite",
@@ -4261,7 +4261,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-preflight"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "flate2",
  "pdfz-content",
@@ -4272,7 +4272,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-print"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "craft-print",
  "pdfz-content",
@@ -4283,7 +4283,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-redact"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-annot",
  "pdfz-content",
@@ -4299,7 +4299,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-render"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "bytemuck",
  "flate2",
@@ -4318,7 +4318,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-sign"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "aes",
  "aws-lc-rs",
@@ -4352,11 +4352,11 @@ dependencies = [
 
 [[package]]
 name = "pdfz-testkit"
-version = "0.9.0"
+version = "0.10.1"
 
 [[package]]
 name = "pdfz-ui-egui"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "arboard",
  "base64 0.22.1",
@@ -4400,7 +4400,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-web"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "eframe",
  "egui",
@@ -4412,7 +4412,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-xfa"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -4426,7 +4426,7 @@ dependencies = [
 
 [[package]]
 name = "pdfz-xfdf"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "pdfz-annot",
  "pdfz-cos",
