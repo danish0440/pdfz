@@ -228,7 +228,9 @@ impl crate::Document {
                         })
                     })
                     .collect();
-                pdfz_export::Page { width: info.width as f64, height: info.height as f64, blocks, images }
+                // The page colour (Edit a PDF ▸ Background, a producer's page fill) for formats that keep one.
+                let background = pdfz_edit::page_background(cos, i).ok().flatten();
+                pdfz_export::Page { width: info.width as f64, height: info.height as f64, blocks, images, background }
             })
             .collect();
         (pages, truncated)

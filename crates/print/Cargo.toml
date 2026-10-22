@@ -14,3 +14,6 @@ pdfz-cos = { workspace = true }
 pdfz-content = { workspace = true }
 pdfz-model = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+pdfz-render = { workspace = true }
