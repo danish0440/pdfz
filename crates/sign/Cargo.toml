@@ -14,8 +14,11 @@ workspace = true
 pdfz-cos = { workspace = true }
 pdfz-annot = { workspace = true }
 pdfz-fonts = { workspace = true }
+pdfz-model = { workspace = true }
 thiserror.workspace = true
-base64 = "0.22"
+# ASN.1 UTCTime/GeneralizedTime conversion goes through chrono (no hand-rolled calendar code).
+chrono = { workspace = true }
+base64 = "0.23"
 sha1 = "0.11"
 sha2 = "0.11"
 p256 = { version = "0.14", default-features = false, features = ["ecdsa", "std"] }
