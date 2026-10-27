@@ -48,6 +48,7 @@ modules:
     build-commands:
       - cargo --offline build --release --locked -p pdfz
       - install -Dm755 target/release/pdfz /app/bin/pdfz
+      - install -Dm644 NOTICE /app/share/doc/pdfz/NOTICE
       - install -Dm644 packaging/linux/com.pintaz.pdfz.desktop /app/share/applications/com.pintaz.pdfz.desktop
       - install -Dm644 packaging/linux/com.pintaz.pdfz.mime.xml /app/share/mime/packages/com.pintaz.pdfz.xml
       - mkdir -p /app/share/icons && cp -R assets/app-icon/hicolor /app/share/icons/

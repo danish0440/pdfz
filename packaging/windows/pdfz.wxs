@@ -12,6 +12,9 @@
   PdfZ arrive on its command line.
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <?ifndef HasCraftFontLicences ?>
+  <?define HasCraftFontLicences=0 ?>
+  <?endif ?>
   <Package
       Name="PdfZ"
       Manufacturer="Learning Machines LLC"
@@ -88,12 +91,20 @@
     <StandardDirectory Id="DesktopFolder" />
 
     <Feature Id="Main" Title="PdfZ" Level="1">
+      <?if $(var.HasCraftFontLicences) = 1 ?>
+      <ComponentGroupRef Id="CraftFontLicences" />
+      <?endif ?>
       <ComponentGroupRef Id="PdfzFiles" />
       <ComponentGroupRef Id="PdfzModels" />
     </Feature>
   </Package>
 
   <Fragment>
+    <?if $(var.HasCraftFontLicences) = 1 ?>
+    <ComponentGroup Id="CraftFontLicences" Directory="INSTALLFOLDER">
+      <Files Include="$(var.DocsDir)\**" />
+    </ComponentGroup>
+    <?endif ?>
     <ComponentGroup Id="PdfzFiles" Directory="INSTALLFOLDER">
       <Component Id="PdfzApp" Guid="4522E0E3-4BD4-5556-8355-CD13F1C8D514">
         <File Id="PdfzExe" Source="$(var.BinDir)\pdfz.exe" KeyPath="yes" />
