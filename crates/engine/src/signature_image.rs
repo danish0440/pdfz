@@ -61,7 +61,7 @@ impl Document {
                 pdfz_annot::props(&editor.cos, page, index).map(|p| p.opacity).filter(|v| v.is_finite()).unwrap_or(1.0).clamp(0.0, 1.0) as f32;
             let turn = pdfz_annot::picture_rotation(&editor.cos, page, index).map_err(|e| e.to_string())?;
             let mut cos = editor.cos.clone();
-            pdfz_annot::delete_annotation(&mut cos, page, index).map_err(|e| e.to_string())?;
+            pdfz_annot::lift_annotation(&mut cos, page, index).map_err(|e| e.to_string())?;
             let bytes = Arc::new(pdfz_cos::write_incremental(&cos, &pdfz_cos::SaveOptions::default()).map_err(|e| e.to_string())?);
             Ok(Some(ImageSignaturePreview { image, opacity, turn, page, bytes, config: self.config.clone() }))
         })?
