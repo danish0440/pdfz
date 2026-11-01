@@ -20,4 +20,5 @@ pdfz-xfa = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+pdfz-filters = { workspace = true }
 pdfz-testkit = { workspace = true }

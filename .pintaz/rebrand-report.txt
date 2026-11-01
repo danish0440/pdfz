@@ -1,60 +1,73 @@
 rebrand pdfcraft -> PdfZ
-about credit inserted in: ['crates/ui-egui/src/dialogs.rs (fallback, after line 1161)']
+about credit inserted in: ['crates/ui-egui/src/dialogs.rs (fallback, after line 1530)']
 launcher patches: []
-lines still naming ArtCraft/getartcraft/discord (non-doc): 56
-ATTRIBUTION.toml:2716: title = "ArtCraft brand: artcraft-logo-white"
-ATTRIBUTION.toml:2717: author = "ArtCraft Team"
-ATTRIBUTION.toml:2718: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2722: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2727: title = "ArtCraft brand: artcraft-logo-white"
-ATTRIBUTION.toml:2728: author = "ArtCraft Team"
-ATTRIBUTION.toml:2729: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2733: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2738: title = "ArtCraft brand: artcraft-logo"
-ATTRIBUTION.toml:2739: author = "ArtCraft Team"
-ATTRIBUTION.toml:2740: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2744: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2749: title = "ArtCraft brand: artcraft-logo"
-ATTRIBUTION.toml:2750: author = "ArtCraft Team"
-ATTRIBUTION.toml:2751: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2755: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2760: title = "ArtCraft brand: artcraft-mark-black"
-ATTRIBUTION.toml:2761: author = "ArtCraft Team"
-ATTRIBUTION.toml:2762: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2766: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2771: title = "ArtCraft brand: artcraft-mark-black"
-ATTRIBUTION.toml:2772: author = "ArtCraft Team"
-ATTRIBUTION.toml:2773: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2777: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2782: title = "ArtCraft brand: artcraft-mark"
-ATTRIBUTION.toml:2783: author = "ArtCraft Team"
-ATTRIBUTION.toml:2784: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2788: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2793: title = "ArtCraft brand: artcraft-mark"
-ATTRIBUTION.toml:2794: author = "ArtCraft Team"
-ATTRIBUTION.toml:2795: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
-ATTRIBUTION.toml:2799: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
-ATTRIBUTION.toml:2805: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2816: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2827: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2838: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2849: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2882: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2893: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2904: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2915: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2926: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2937: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2948: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2959: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:2970: author = "PdfZ contributors (drawn by the project owner in ArtCraft; vectorised with craftrules vectorize_tile.py)"
-ATTRIBUTION.toml:3096: usage = "README: tool catalogue. Shows PdfZ UI, Lucide icons, the showcase PDF built from the [[fetched]] OFL fonts, and the ArtCraft mark (Storyteller trademar
-crates/ui-egui/tests/ui_group/links.rs:2: //! home screen open the ArtCraft and PdfZ pages.
-crates/ui-egui/src/widgets.rs:502: /// The ArtCraft wordmark (Storyteller's brand, docs/brand/; not open source), sized to `height`.
-crates/ui-egui/src/widgets.rs:513: /// The ArtCraft mark (brand blue, works on light and dark), `size` points square.
-crates/ui-egui/src/dialogs.rs:1162: // PINTAZ-ABOUT: required credit (Apache-2.0 change notice; ArtCraft brand licence)
-crates/ui-egui/src/dialogs.rs:1164: ui.label("Based on PdfCraft by Storytold (ArtCraft), Apache-2.0. Changes by PINTAZ TECHNOLOGIES.");
+lines still naming ArtCraft/getartcraft/discord (non-doc): 69
+ATTRIBUTION.toml:2787: title = "ArtCraft brand: artcraft-logo-white"
+ATTRIBUTION.toml:2788: author = "ArtCraft Team"
+ATTRIBUTION.toml:2789: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2793: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2798: title = "ArtCraft brand: artcraft-logo-white"
+ATTRIBUTION.toml:2799: author = "ArtCraft Team"
+ATTRIBUTION.toml:2800: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2804: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2809: title = "ArtCraft brand: artcraft-logo"
+ATTRIBUTION.toml:2810: author = "ArtCraft Team"
+ATTRIBUTION.toml:2811: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2815: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2820: title = "ArtCraft brand: artcraft-logo"
+ATTRIBUTION.toml:2821: author = "ArtCraft Team"
+ATTRIBUTION.toml:2822: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2826: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2831: title = "ArtCraft brand: artcraft-mark-black"
+ATTRIBUTION.toml:2832: author = "ArtCraft Team"
+ATTRIBUTION.toml:2833: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2837: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2842: title = "ArtCraft brand: artcraft-mark-black"
+ATTRIBUTION.toml:2843: author = "ArtCraft Team"
+ATTRIBUTION.toml:2844: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2848: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2853: title = "ArtCraft brand: artcraft-mark"
+ATTRIBUTION.toml:2854: author = "ArtCraft Team"
+ATTRIBUTION.toml:2855: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2859: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2864: title = "ArtCraft brand: artcraft-mark"
+ATTRIBUTION.toml:2865: author = "ArtCraft Team"
+ATTRIBUTION.toml:2866: source = "ArtCraft Team brand assets (provided by the project owner, 2026-10-01; identical copies in storytold/photocraft)"
+ATTRIBUTION.toml:2870: usage = "ArtCraft branding next to the community links (About dialog, Help menu, home screen) and in docs. ArtCraft Team trademark, not open source; may be used
+ATTRIBUTION.toml:2876: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2887: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2898: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2909: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2920: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2953: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2964: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2975: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2986: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:2997: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:3008: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:3019: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:3030: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:3041: author = "PdfZ contributors (drawn by the project owner in ArtCraft)"
+ATTRIBUTION.toml:3167: usage = "README: tool catalogue. Shows PdfZ UI, Lucide icons, the showcase PDF built from the [[fetched]] OFL fonts, and the ArtCraft mark (Storyteller trademar
+crates/ui-egui/src/dialogs.rs:1531: // PINTAZ-ABOUT: required credit (Apache-2.0 change notice; ArtCraft brand licence)
+crates/ui-egui/src/dialogs.rs:1533: ui.label("Based on PdfCraft by Storytold (ArtCraft), Apache-2.0. Changes by PINTAZ TECHNOLOGIES.");
+crates/ui-egui/src/widgets.rs:588: /// The ArtCraft wordmark (Storyteller's brand, docs/brand/; not open source), sized to `height`.
+crates/ui-egui/src/widgets.rs:599: /// The ArtCraft mark (brand blue, works on light and dark), `size` points square.
+crates/ui-egui/tests/it/links.rs:2: //! home screen open the ArtCraft and PdfZ pages.
 crates/engine/src/links.rs:7: /// The app's name in ArtCraft URLs (`getartcraft.com/apps/{APP}`, `github.com/storytold/{APP}`).
+packaging/windows/install-policy.wxi:34: <SetProperty Id="INSTALLFOLDER" Action="CraftDefaultMachineFolder" Value="[%ProgramFiles(x86)]\ArtCraft\PdfZ\" After="CraftRestoreUserFolder" Sequence="ui" Cond
+packaging/windows/install-policy.wxi:35: <SetProperty Id="INSTALLFOLDER" Action="CraftDefaultMachineFolder32" Value="[%ProgramFiles]\ArtCraft\PdfZ\" After="CraftDefaultMachineFolder" Sequence="ui" Cond
+packaging/windows/install-policy.wxi:36: <SetProperty Id="INSTALLFOLDER" Action="CraftDefaultUserFolder" Value="[LocalAppDataFolder]Programs\ArtCraft\PdfZ\" After="CraftDefaultMachineFolder32" Sequence
+packaging/windows/install-policy.wxi:38: <SetProperty Id="INSTALLFOLDER" Action="CraftDefaultMachineFolder" Value="[%ProgramW6432]\ArtCraft\PdfZ\" After="CraftRestoreUserFolder" Sequence="ui" Condition
+packaging/windows/install-policy.wxi:39: <SetProperty Id="INSTALLFOLDER" Action="CraftDefaultUserFolder" Value="[LocalAppDataFolder]Programs\ArtCraft\PdfZ\" After="CraftDefaultMachineFolder" Sequence="
+packaging/windows/install-policy.wxi:49: <Control Id="Info" Type="Text" X="20" Y="50" Width="330" Height="30" Text="{\CraftScopeText}An update keeps the existing folder. New copies use the ArtCraft fol
+packaging/windows/check-install-policy.ps1:58: if ($dirs['INSTALLFOLDER'][0] -ne 'CraftSuiteFolder' -or $dirs['CraftSuiteFolder'][1] -ne 'ArtCraft' -or
+packaging/windows/check-install-policy.ps1:60: throw 'Launcher new-install folder must be under the per-user ArtCraft suite root.'
+packaging/windows/check-install-policy.ps1:91: $directories['CraftSuiteFolder'][1] -ne 'ArtCraft') { throw 'Expected the app under the ArtCraft suite folder.' }
+packaging/windows/check-install-policy.ps1:164: $machineFolder = (Join-Path $machineRoot "ArtCraft\$($policy.name)") + '\'
+packaging/windows/check-install-policy.ps1:174: $wanted = if ($scope -eq '1') { $machineFolder } else { (Join-Path $env:LOCALAPPDATA "Programs\ArtCraft\$($policy.name)") + '\' }
+packaging/linux/flatpak/com.pintaz.pdfz.bundle.yml:20: - --filesystem=xdg-data/ArtCraft/versions:ro
+packaging/linux/flatpak/com.pintaz.pdfz.yml:21: - --filesystem=xdg-data/ArtCraft/versions:ro
+xtask/src/assets.rs:40: /// Storyteller's own brand marks (the ArtCraft name and logos): shipped in the app and docs, but
 xtask/src/screenshots.rs:109: // The home screen shows the ArtCraft mark: say so (it is a Storyteller trademark, not open
 xtask/src/screenshots.rs:113: "Shows PdfZ UI, Lucide icons, the showcase PDF built from the [[fetched]] OFL fonts, and the ArtCraft mark (Storyteller trademark from docs/brand/, not covered 
-xtask/src/assets.rs:39: /// Storyteller's own brand marks (the ArtCraft name and logos): shipped in the app and docs, but
