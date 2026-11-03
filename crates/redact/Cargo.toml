@@ -17,6 +17,8 @@ pdfz-forms = { workspace = true }
 pdfz-edit = { workspace = true }
 pdfz-annot = { workspace = true }
 pdfz-xfa = { workspace = true }
+# CCITT Group 4 and JBIG2 encoding for cleared one-bit images.
+pdfz-filters = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
