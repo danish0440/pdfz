@@ -13,5 +13,5 @@ pdfz-cos = { workspace = true }
 pdfz-annot = { workspace = true }
 pdfz-forms = { workspace = true }
 pdfz-model = { workspace = true }
-roxmltree = "0.20"
+roxmltree = "0.21"
 thiserror = { workspace = true }
