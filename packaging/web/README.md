@@ -78,6 +78,64 @@ Local test: `python3 -m http.server 8765` inside the folder, then open http://lo
   downloads) are blocked.
 - Don't send `X-Frame-Options: DENY` or a `frame-ancestors` CSP that excludes the embedding page.
 
+## Same-document host mode (no iframe)
+
+A host application can also run PdfZ from its own document: it loads the wasm-bindgen module
+itself and gives PdfZ one of its own canvases, so there is no iframe and no `?host=parent`.
+It opts in with `data-host="page"` on that canvas — the exact value `page` — and the canvas
+keeps the id the app looks up (`id="pdfz"`).
+
+The page and the app then talk with DOM `CustomEvent`s on the canvas instead of `postMessage`.
+The app dispatches the same messages it would post to a parent — `pdfz:ready`,
+`pdfz:save`, `pdfz:dirty`, `pdfz:failed` — with the message fields (without the
+`type`) as the event's `detail`, and it opens a file when the page dispatches a `pdfz:open`
+event with `detail: { name, bytes }`. Events do not bubble, so listen on the canvas itself.
+
+Add the listeners before `init`: the app announces itself with `pdfz:ready` while `init` is
+still running, and a file sent in reply would otherwise be missed.
+
+```js
+import init from "./pdfz-web-<hash>.js"; // the wasm-bindgen glue shipped with the app
+
+const canvas = document.getElementById("pdfz");
+canvas.dataset.host = "page";             // or <canvas id="pdfz" data-host="page">
+
+canvas.addEventListener("pdfz:ready", () => {
+  // The app is listening; hand it a document now, if you have one.
+  canvas.dispatchEvent(new CustomEvent("pdfz:open", {
+    detail: { name: "handout.pdf", bytes: pdfBytes },   // ArrayBuffer or Uint8Array
+  }));
+});
+canvas.addEventListener("pdfz:save", (event) => {
+  const { name, saveAs, bytes } = event.detail;         // bytes is an ArrayBuffer
+  // Store the file under `name`; `saveAs` is true for Save As. Report your own errors.
+});
+canvas.addEventListener("pdfz:dirty", (event) => {
+  unsaved = event.detail.dirty;                         // warn before leaving, as you like
+});
+canvas.addEventListener("pdfz:failed", (event) => {
+  showError(event.detail.error);                        // the app couldn't start
+});
+
+await init({ module_or_path: "./pdfz-web-<hash>_bg.wasm" });
+```
+
+- Saves are not downloads in this mode: the `bytes` in `pdfz:save` hold the saved PDF, and
+  the host decides where the file goes.
+- `?author=<name>` still signs the user's comments, as with `?host=parent`.
+- An unframed page that uses `?host=parent` keeps the normal app with downloads.
+  `data-host="page"` turns this mode on only when `?host=parent` is absent: if `?host=parent` is
+  present it takes precedence, so a same-origin framed page uses the parent bridge, while an
+  unframed or cross-origin page gets no bridge and keeps normal downloads.
+
+The messages and both transports are the shared contract of [`craft-web-host`](https://github.com/storytold/craft-libs/tree/main/crates/web-host) (storytold/craft-libs#420), the same for every Craft app: its README lists every message, including `saved`, with the compatibility notes. In `pdfz:ready`, `version` is the contract's (`"1"`) and `appVersion` is this app's release. PdfZ reads bytes, so a host sends `bytes`, not a `File`.
+
+### Trust and limits
+
+- **Who is trusted.** In page host mode the page and PdfZ share one document, so any script on the page can drive the app: open files in it and receive what it saves. Use this mode only for a page you control. The iframe mode (`?host=parent`) answers only the parent window, on the page's own origin.
+- **Files from the host are untrusted input.** An opened file goes through the same reading as one picked with File ▸ Open or dropped on the window, with the same format limits; before it is copied into the app's memory, its size is checked against the host open limit (512 MiB) and a larger file is refused, and a name is cut to 255 characters.
+- **The event and message names are the interface.** `pdfz:ready`, `pdfz:open`, `pdfz:save`, `pdfz:dirty` and `pdfz:failed`, and the fields they carry (the same as the `?host=parent` messages), stay stable; changing one is a breaking change.
+
 ## Renderer selection and fallback flags
 
 PdfZ renders with wgpu. It uses **WebGPU** when the browser has it and falls back to
