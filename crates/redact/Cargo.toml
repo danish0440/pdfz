@@ -9,6 +9,7 @@ license.workspace = true
 workspace = true
 
 [dependencies]
+aho-corasick = "1"
 pdfz-cos = { workspace = true }
 pdfz-content = { workspace = true }
 pdfz-fonts = { workspace = true }
@@ -17,7 +18,13 @@ pdfz-forms = { workspace = true }
 pdfz-edit = { workspace = true }
 pdfz-annot = { workspace = true }
 pdfz-xfa = { workspace = true }
+# CCITT Group 4 and JBIG2 encoding for cleared one-bit images.
+pdfz-filters = { workspace = true }
 thiserror = { workspace = true }
+sha2 = "0.11"
 
 [dev-dependencies]
 pdfz-testkit = { workspace = true }
+# The redacted page is rendered in `tests::a_page_whose_pruned_pattern_is_still_selected_renders`:
+# layer 3 from layer 4, a dev dependency only.
+pdfz-render = { workspace = true }
