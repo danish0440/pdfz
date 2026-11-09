@@ -53,6 +53,7 @@ fn click_only(e: &XfaEffect) -> Option<&'static str> {
         XfaEffect::Print => Some("print"),
         XfaEffect::SaveAs => Some("save"),
         XfaEffect::LaunchUrl(_) => Some("open a link"),
+        XfaEffect::ShowPanel(_) => Some("show a side panel"),
         XfaEffect::SetFocus(_) => Some("move the focus"),
         _ => None,
     }
@@ -127,8 +128,13 @@ pub(crate) struct XfaRun<'a> {
     pub datasets: Option<pdfz_cos::ObjRef>,
     /// A script ran past its time limit and was abandoned: the form's scripts should stay off.
     pub ran_away: bool,
+    /// What every time limit of the scripts is multiplied by (the event's budget, the engine's
+    /// start and each script's own): 1, unless the session was given another
+    /// ([`crate::Session::with_xfa_time_scale`]).
+    pub time_scale: u32,
 }
 
+/// The live form node `n`, with its descendants, as the script engine's snapshot of it.
 fn to_js(n: &FormNode) -> XfaNode {
     XfaNode {
         name: n.name.clone(),
@@ -149,6 +155,7 @@ fn to_js(n: &FormNode) -> XfaNode {
         occur_max: n.occur_max,
         index: n.index,
         children: n.children.iter().map(to_js).collect(),
+        formatted: n.display_picture.as_deref().and_then(|p| pdfz_xfa::formatted_value(p, &n.value)),
     }
 }
 
@@ -268,12 +275,16 @@ struct Runner<'a, 'b> {
     /// rebuilt when the structure changed).
     session: Option<XfaSession>,
     changes: Changes,
+    /// A field embedded in rich text (a floating field) took a new value since the form was
+    /// last laid out: the text that shows it is laid out again when the event ends.
+    embedded_changed: bool,
 }
 
 impl<'a, 'b> Runner<'a, 'b> {
     fn new(doc: &'a mut pdfz_cos::Document, tpl: &'a Template, run: &'a mut XfaRun<'b>, budget_ms: u64) -> Self {
         let data = pdfz_xfa::data_of(doc);
         let ov = pdfz_xfa::overrides(doc);
+        let budget_ms = budget_ms.saturating_mul(u64::from(run.time_scale));
         Runner {
             doc,
             tpl,
@@ -296,6 +307,7 @@ impl<'a, 'b> Runner<'a, 'b> {
             cached: None,
             session: None,
             changes: Changes::default(),
+            embedded_changed: false,
         }
     }
 
@@ -308,7 +320,8 @@ impl<'a, 'b> Runner<'a, 'b> {
     /// The script engine for this event.
     fn session(&mut self) -> &mut XfaSession {
         let doc_info = XfaDoc { file_name: String::new(), page: 0, page_count: self.run.page_count };
-        self.session.get_or_insert_with(|| XfaSession::new(doc_info))
+        let scale = self.run.time_scale;
+        self.session.get_or_insert_with(|| XfaSession::new(doc_info).with_time_scale(scale))
     }
 
     /// Give the object at `som` the value `text` in the data and in the live form (refreshed
@@ -379,6 +392,7 @@ impl<'a, 'b> Runner<'a, 'b> {
         }
     }
 
+    /// Keep console `lines`, up to [`MAX_CONSOLE_PER_EVENT`] for one event; the rest are counted.
     fn console(&mut self, lines: impl IntoIterator<Item = String>) {
         for l in lines {
             if self.run.out.console.len() < MAX_CONSOLE_PER_EVENT {
@@ -389,7 +403,8 @@ impl<'a, 'b> Runner<'a, 'b> {
         }
     }
 
-    fn alert(&mut self, m: String) {
+    /// Show message `m`, up to [`MAX_ALERTS_PER_EVENT`] for one event; the rest are counted.
+    fn alert(&mut self, m: crate::js::Message) {
         if self.run.out.alerts.len() < MAX_ALERTS_PER_EVENT {
             self.run.out.alerts.push(m);
         } else {
@@ -411,6 +426,9 @@ impl<'a, 'b> Runner<'a, 'b> {
     fn set_value(&mut self, som: &str, value: &str) -> bool {
         use pdfz_forms::FieldKind as K;
         let path = pdfz_xfa::data_path(self.tpl, som);
+        // A floating field shows the value of its data node in the text that embeds it (XFA 3.3
+        // pp. 221–222): a page area's, or one another field shares, as well.
+        let embedded = pdfz_xfa::path_is_embedded(self.tpl, &path);
         let names = self.widgets_at(&path);
         // The data text: the widget at `som` says how its kind writes the value; without one,
         // the first widget bound to the node, else the value itself.
@@ -460,6 +478,7 @@ impl<'a, 'b> Runner<'a, 'b> {
         }
         if changed {
             self.changes.values += 1;
+            self.embedded_changed |= embedded;
         }
         changed
     }
@@ -510,6 +529,7 @@ impl<'a, 'b> Runner<'a, 'b> {
         }
         self.relayouts += 1;
         self.flush()?;
+        self.embedded_changed = false;
         let report = pdfz_xfa::rerender(self.doc, self.tpl).map_err(|e| e.to_string())?;
         self.console(report.warnings);
         crate::xfa_redraw(self.doc)?;
@@ -530,13 +550,14 @@ impl<'a, 'b> Runner<'a, 'b> {
         } else {
             Some(by_som.iter().filter(|(som, _)| names.iter().any(|n| som_matches(som, n))).map(|(_, f)| f.clone()).collect())
         };
-        if listed.as_ref().is_some_and(|l| l.is_empty()) {
-            return Ok(());
+        // Names no widget answers to may still name a floating field (below).
+        let widgets = !listed.as_ref().is_some_and(Vec::is_empty);
+        if widgets {
+            pdfz_forms::reset(self.doc, listed.as_deref()).map_err(|e| e.to_string())?;
         }
-        pdfz_forms::reset(self.doc, listed.as_deref()).map_err(|e| e.to_string())?;
         self.fields = None;
         let infos = self.fields().clone();
-        for (som, name) in &by_som {
+        for (som, name) in by_som.iter().filter(|_| widgets) {
             if listed.as_ref().is_some_and(|l| !l.contains(name)) {
                 continue;
             }
@@ -547,8 +568,26 @@ impl<'a, 'b> Runner<'a, 'b> {
             let path = pdfz_xfa::data_path(self.tpl, som);
             let text = data_text(info);
             if self.data.as_ref().and_then(|d| d.text_at(&path)).unwrap_or("") != text {
+                self.embedded_changed |= pdfz_xfa::path_is_embedded(self.tpl, &path);
                 self.data_op(pdfz_xfa::DataOp::Value { path, text });
                 self.changes.values += 1;
+            }
+        }
+        // A floating field without a widget (a hidden one, as forms place them) goes back to
+        // its default too, and the text that embeds it shows that.
+        for (som, default) in pdfz_xfa::embedded_fields(self.tpl) {
+            if by_som.contains_key(&som) || (!names.is_empty() && !names.iter().any(|n| som_matches(&som, n))) {
+                continue;
+            }
+            // Every row that holds it, not only the first.
+            let names: Vec<String> = pdfz_xfa::data_path(self.tpl, &som).into_iter().map(|(name, _)| name).collect();
+            let paths = self.data.as_ref().map(|d| d.paths_named(&names, pdfz_xfa::MAX_FORM_NODES)).unwrap_or_default();
+            for path in paths {
+                if self.data.as_ref().and_then(|d| d.text_at(&path)).unwrap_or("") != default {
+                    self.embedded_changed = true;
+                    self.data_op(pdfz_xfa::DataOp::Value { path, text: default.clone() });
+                    self.changes.values += 1;
+                }
             }
         }
         self.invalidate();
@@ -626,6 +665,7 @@ impl<'a, 'b> Runner<'a, 'b> {
                 XfaEffect::Print => self.run.out.requests.push(Request::Print),
                 XfaEffect::SaveAs => self.run.out.requests.push(Request::SaveAs),
                 XfaEffect::LaunchUrl(u) => self.run.out.requests.push(Request::LaunchUrl(u.clone())),
+                XfaEffect::ShowPanel(p) => self.run.out.requests.push(Request::ShowPanel(*p)),
                 XfaEffect::SetFocus(som) => {
                     if let Some(name) = self.by_som().get(som).cloned() {
                         self.run.out.requests.push(Request::Focus(name));
@@ -657,7 +697,7 @@ impl<'a, 'b> Runner<'a, 'b> {
             event,
             root,
             limits: limits_for(&ev.activity),
-            timeout: timeout_for(&ev.activity),
+            timeout: timeout_for(&ev.activity).saturating_mul(self.run.time_scale),
         };
         let o = self.session().run(script);
         if o.abandoned {
@@ -669,9 +709,12 @@ impl<'a, 'b> Runner<'a, 'b> {
         for n in &o.notes {
             self.error(format!("{} ({}): {n}", ev.som, ev.activity));
         }
+        // A script that fails keeps what it changed before the error, as JavaScript does: forms
+        // often trip over an object an earlier version had, late in a script whose first lines
+        // did the work (opening the next fields, showing a subform). An abandoned script, or
+        // one the engine failed, reports no changes.
         if let Some(e) = &o.error {
             self.error(format!("{} ({}): {e}", ev.som, ev.activity));
-            return Ok(Some(o));
         }
         if self.apply_effects(ev, &o.effects)? {
             self.relayout()?;
@@ -704,7 +747,7 @@ impl<'a, 'b> Runner<'a, 'b> {
     fn finish(mut self) -> Result<Changes, String> {
         #[cfg(test)]
         self.check_live();
-        if self.relayouts_skipped {
+        if self.relayouts_skipped || self.embedded_changed {
             self.relayouts = 0;
             self.relayouts_skipped = false;
             self.relayout()?;
@@ -764,6 +807,107 @@ fn collect_fields(n: &FormNode, out: &mut Vec<(String, String, String, String)>,
     }
 }
 
+/// Reflow a laid-out XFA form when an edited multiline field can grow, or an edited text field,
+/// choice list or check box is embedded in rich text (a floating field, whose value that text
+/// shows). The datasets must
+/// already hold the final values, including calculation results. Fixed-height fields keep
+/// their existing geometry; forms without scripts parse their template only when needed.
+/// `Some` means pages/widgets were rebuilt and the caller must fully refresh its snapshot.
+pub(crate) fn relayout_changed_text(
+    doc: &mut pdfz_cos::Document,
+    cached: Option<&Template>,
+    before: &[pdfz_forms::Field],
+) -> Result<Option<Vec<String>>, String> {
+    if pdfz_xfa::existing_layout(doc).is_none() {
+        return Ok(None);
+    }
+    let current = &*doc;
+    let mut changed = before
+        .iter()
+        .filter(|f| {
+            use pdfz_forms::FieldKind as K;
+            matches!(f.kind, K::Text | K::Combo | K::List | K::CheckBox)
+        })
+        .filter_map(|f| {
+            let object = current.get(f.obj);
+            let dict = object.as_dict()?;
+            if value_unchanged(current, f, dict.get(b"V")) {
+                return None;
+            }
+            dict.get(pdfz_xfa::SOM_KEY).and_then(|s| current.resolve(s).as_string().map(|s| s.to_text()))
+        })
+        .peekable();
+    if changed.peek().is_none() {
+        return Ok(None);
+    }
+    let template = match cached {
+        Some(tpl) => std::borrow::Cow::Borrowed(tpl),
+        None => std::borrow::Cow::Owned(pdfz_xfa::template_of(current).map_err(|e| e.to_string())?),
+    };
+    let reflow = changed.any(|som| pdfz_xfa::field_grows_with_text(&template, &som) || pdfz_xfa::field_is_embedded(&template, &som));
+    drop(changed);
+    if !reflow {
+        return Ok(None);
+    }
+    let report = pdfz_xfa::rerender(doc, &template).map_err(|e| e.to_string())?;
+    crate::xfa_redraw(doc)?;
+    Ok(Some(report.warnings))
+}
+
+/// Whether field `f` still holds the value it had (`f.value`), its `/V` being `v`: a list box's
+/// picks are an array, a check box's state a name (Off for none, as the field's value has
+/// none), and of a text field only the first value counts. Compared in place, so an edit costs
+/// no copy of every field's value.
+fn value_unchanged(doc: &pdfz_cos::Document, f: &pdfz_forms::Field, v: Option<&pdfz_cos::Object>) -> bool {
+    use pdfz_cos::Object as O;
+    let text = f.kind == pdfz_forms::FieldKind::Text;
+    let first = f.value.first().map_or("", String::as_str);
+    // The value is the one string `is` accepts.
+    let one = |is: &dyn Fn(&str) -> bool| if text { is(first) } else { matches!(f.value.as_slice(), [old] if is(old)) };
+    let none = if text { first.is_empty() } else { f.value.is_empty() };
+    let held;
+    let v = match v {
+        Some(r @ O::Ref(_)) => {
+            held = doc.resolve(r);
+            Some(&*held)
+        }
+        v => v,
+    };
+    match v {
+        Some(O::Array(items)) => {
+            let mut old = f.value.iter();
+            for item in items {
+                let held_item;
+                let item = match item {
+                    O::Ref(_) => {
+                        held_item = doc.resolve(item);
+                        &*held_item
+                    }
+                    i => i,
+                };
+                let Some(s) = item.as_string() else { continue };
+                if text {
+                    return s.text_eq(first);
+                }
+                if !old.next().is_some_and(|o| s.text_eq(o)) {
+                    return false;
+                }
+            }
+            if text { none } else { old.next().is_none() }
+        }
+        Some(O::Name(n)) if n.as_slice() == b"Off" => none,
+        Some(O::Name(n)) => {
+            let n = String::from_utf8_lossy(n);
+            one(&|old| old == n)
+        }
+        Some(v) => match v.as_string() {
+            Some(s) => one(&|old| s.text_eq(old)),
+            None => none,
+        },
+        None => none,
+    }
+}
+
 /// On open: initialize scripts, then calculations. Returns what they changed.
 pub(crate) fn on_open(doc: &mut pdfz_cos::Document, tpl: &Template, run: &mut XfaRun) -> Result<Changes, String> {
     let mut r = Runner::new(doc, tpl, run, OPEN_BUDGET_MS);
@@ -791,7 +935,7 @@ pub(crate) fn on_changes(doc: &mut pdfz_cos::Document, tpl: &Template, names: &[
         for ev in r.events_of(&som, "validate") {
             let Some(o) = r.run(&ev, &value)? else { continue };
             if (o.result_bool == Some(false) || o.error.is_some()) && !value.trim().is_empty() {
-                r.alert(ev.message.clone().unwrap_or_else(|| format!("{name}: the value is not valid")));
+                r.alert(crate::js::Message::plain(ev.message.clone().unwrap_or_else(|| format!("{name}: the value is not valid"))));
             }
         }
     }
@@ -810,6 +954,28 @@ pub(crate) fn on_data_replaced(doc: &mut pdfz_cos::Document, tpl: &Template, cal
     r.finish().map(|_| ())
 }
 
+/// A text value typed into the laid-out XFA date field `name` by another of its edit picture's
+/// patterns, written in the first ([`pdfz_xfa::typed_date`]); `None` for anything else.
+/// `tpl` is the template the scripts use, when they run; otherwise it is read from `doc`.
+pub(crate) fn typed_date(
+    doc: &pdfz_cos::Document,
+    tpl: Option<&Template>,
+    name: &str,
+    value: &pdfz_forms::FieldValue,
+) -> Option<pdfz_forms::FieldValue> {
+    let pdfz_forms::FieldValue::Text(text) = value else { return None };
+    let som = pdfz_xfa::fields_by_som(doc).into_iter().find_map(|(som, n)| (n == name).then_some(som))?;
+    let read;
+    let tpl = match tpl {
+        Some(t) => t,
+        None => {
+            read = pdfz_xfa::template_of(doc).ok()?;
+            &read
+        }
+    };
+    pdfz_xfa::typed_date(tpl, &som, text).map(pdfz_forms::FieldValue::Text)
+}
+
 /// A button's click script (or any event, by SOM path and activity), then calculations.
 pub(crate) fn on_event(doc: &mut pdfz_cos::Document, tpl: &Template, som: &str, activity: &str, run: &mut XfaRun) -> Result<(), String> {
     let mut r = Runner::new(doc, tpl, run, EVENT_BUDGET_MS);
@@ -821,15 +987,17 @@ pub(crate) fn on_event(doc: &mut pdfz_cos::Document, tpl: &Template, som: &str, 
         r.run(&ev, "")?;
     }
     // The calculations that follow get a budget of their own.
-    r.clock = Clock::start(OPEN_BUDGET_MS);
+    r.clock = Clock::start(OPEN_BUDGET_MS.saturating_mul(u64::from(r.run.time_scale)));
     r.calculates()?;
     r.finish().map(|_| ())
 }
 
-/// The SOM path of field `name` when PdfZ generated it from an XFA template and the
-/// template has a click script for it (a button with a native action has none).
-pub(crate) fn clickable_som(doc: &pdfz_cos::Document, tpl: &Template, name: &str) -> Option<String> {
-    let som = pdfz_xfa::fields_by_som(doc).into_iter().find(|(_, f)| f == name).map(|(s, _)| s)?;
+/// The SOM path of a generated field whose template has a click script.
+pub(crate) fn clickable_som(doc: &pdfz_cos::Document, tpl: &Template, field: &pdfz_forms::Field) -> Option<String> {
+    // Page-master copies have distinct PDF field names but share a SOM path. Reversing
+    // fields_by_som would lose every copy except the last: use the clicked field itself.
+    let object = doc.get(field.obj);
+    let som = object.as_dict()?.get(pdfz_xfa::SOM_KEY).map(|s| doc.resolve(s))?.as_string()?.to_text();
     let live = pdfz_xfa::form_tree(tpl, pdfz_xfa::data_of(doc).as_ref(), &pdfz_xfa::overrides(doc));
     live.events.iter().any(|e| e.som == som && e.activity == "click").then_some(som)
 }
@@ -871,5 +1039,103 @@ mod tests {
             split_instance(&Template::default(), "form[0].table[0].row[2]").map(|(p, ps, n, i)| (p.len(), ps, n, i)),
             Some((2, "form[0].table[0]".into(), "row".into(), 2))
         );
+    }
+
+    fn field(obj: pdfz_cos::ObjRef, kind: pdfz_forms::FieldKind, value: &[&str]) -> pdfz_forms::Field {
+        pdfz_forms::Field {
+            name: "f".into(),
+            obj,
+            kind,
+            value: value.iter().map(|v| (*v).to_owned()).collect(),
+            default: Vec::new(),
+            flags: 0,
+            max_len: None,
+            options: Vec::new(),
+            da: String::new(),
+            quadding: 0,
+            tooltip: None,
+            widgets: Vec::new(),
+            actions: pdfz_forms::af::Actions::default(),
+            button: None,
+        }
+    }
+
+    /// A field dictionary whose `/V` is `v`, with a SOM path.
+    fn field_dict(doc: &mut pdfz_cos::Document, v: Option<pdfz_cos::Object>) -> pdfz_cos::ObjRef {
+        let mut d = pdfz_cos::Dict::new();
+        if let Some(v) = v {
+            d.set(b"V".to_vec(), v);
+        }
+        d.set(pdfz_xfa::SOM_KEY.to_vec(), pdfz_cos::Object::String(pdfz_cos::PdfString::text("form[0].f[0]")));
+        doc.add(d)
+    }
+
+    #[test]
+    fn changed_values_are_found_in_place() {
+        use pdfz_cos::{Object as O, PdfString};
+        use pdfz_forms::FieldKind as K;
+        let s = |t: &str| O::String(PdfString::text(t));
+        let mut doc = pdfz_cos::Document::new_empty();
+        let same = |doc: &mut pdfz_cos::Document, kind, old: &[&str], v: Option<O>| {
+            let r = field_dict(doc, v);
+            let dict = doc.get(r);
+            value_unchanged(doc, &field(r, kind, old), dict.as_dict().and_then(|d| d.get(b"V")))
+        };
+        // Text: the first value only, an absent or non-text value being empty.
+        assert!(same(&mut doc, K::Text, &["Café"], Some(s("Café"))));
+        assert!(!same(&mut doc, K::Text, &["Café"], Some(s("Cafe"))));
+        assert!(same(&mut doc, K::Text, &[], None));
+        assert!(same(&mut doc, K::Text, &[], Some(s(""))));
+        assert!(!same(&mut doc, K::Text, &["a"], None));
+        assert!(same(&mut doc, K::Text, &["a", "b"], Some(O::Array(vec![s("a"), s("c")]))));
+        // A value given by reference is followed.
+        let inner = doc.add(s("日本"));
+        assert!(same(&mut doc, K::Text, &["日本"], Some(O::Ref(inner))));
+        assert!(!same(&mut doc, K::Combo, &["日"], Some(O::Ref(inner))));
+        // Combo box: one value.
+        assert!(same(&mut doc, K::Combo, &["Two"], Some(s("Two"))));
+        assert!(!same(&mut doc, K::Combo, &["Two"], Some(s("Three"))));
+        assert!(!same(&mut doc, K::Combo, &[], Some(s("Two"))));
+        assert!(!same(&mut doc, K::Combo, &["Two"], None));
+        // List box: every pick, in order, by count; non-strings in the array are skipped.
+        let picks = |v: &[&str]| O::Array(v.iter().map(|t| s(t)).collect());
+        assert!(same(&mut doc, K::List, &["a", "b"], Some(picks(&["a", "b"]))));
+        assert!(!same(&mut doc, K::List, &["a", "b"], Some(picks(&["b", "a"]))));
+        assert!(!same(&mut doc, K::List, &["a", "b"], Some(picks(&["a"]))));
+        assert!(!same(&mut doc, K::List, &["a"], Some(picks(&["a", "b"]))));
+        assert!(!same(&mut doc, K::List, &["a", "b"], Some(picks(&["a", "c"]))));
+        assert!(same(&mut doc, K::List, &[], Some(picks(&[]))));
+        let item = doc.add(s("b"));
+        assert!(same(&mut doc, K::List, &["a", "b"], Some(O::Array(vec![s("a"), O::Int(3), O::Ref(item)]))));
+        // Check box: a state name, Off for none.
+        assert!(same(&mut doc, K::CheckBox, &["Yes"], Some(O::name("Yes"))));
+        assert!(!same(&mut doc, K::CheckBox, &["Yes"], Some(O::name("Off"))));
+        assert!(same(&mut doc, K::CheckBox, &[], Some(O::name("Off"))));
+        assert!(!same(&mut doc, K::CheckBox, &[], Some(O::name("Yes"))));
+        assert!(!same(&mut doc, K::CheckBox, &["Yes"], Some(O::name("On"))));
+    }
+
+    #[test]
+    fn unchanged_values_return_before_the_template_is_read() {
+        use pdfz_cos::{Object as O, PdfString};
+        use pdfz_forms::FieldKind as K;
+        // Laid out, but with no XFA packets: reading the template fails.
+        let mut doc = pdfz_cos::Document::new_empty();
+        let mut acro = pdfz_cos::Dict::new();
+        acro.set(pdfz_xfa::LAYOUT_KEY.to_vec(), pdfz_cos::Dict::new());
+        let acro = doc.add(acro);
+        let root = doc.root().unwrap_or_else(|| panic!("no catalog"));
+        let mut catalog = doc.get(root).as_dict().cloned().unwrap_or_default();
+        catalog.set(b"AcroForm".to_vec(), O::Ref(acro));
+        doc.set(root, catalog);
+        assert!(pdfz_xfa::existing_layout(&doc).is_some());
+        let text = field_dict(&mut doc, Some(O::String(PdfString::text("same"))));
+        let list = field_dict(&mut doc, Some(O::Array(vec![O::String(PdfString::text("a")), O::String(PdfString::text("b"))])));
+        let check = field_dict(&mut doc, Some(O::name("Yes")));
+        let before = [field(text, K::Text, &["same"]), field(list, K::List, &["a", "b"]), field(check, K::CheckBox, &["Yes"])];
+        assert_eq!(relayout_changed_text(&mut doc, None, &before), Ok(None));
+        // A changed pick reaches the template, which this document doesn't have.
+        let before = [field(text, K::Text, &["same"]), field(list, K::List, &["b", "a"]), field(check, K::CheckBox, &["Yes"])];
+        assert!(relayout_changed_text(&mut doc, None, &before).is_err());
     }
 }

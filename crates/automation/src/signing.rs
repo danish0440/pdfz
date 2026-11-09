@@ -119,6 +119,7 @@ impl Automation {
             "page": s.page.map(|p| p + 1),
             "rect": rect,
             "visible": s.visible,
+            "verdict_shown": s.verdict_shown,
             "revision": s.revision,
             "sub_filter": s.sub_filter,
             "algorithm": s.algorithm,
@@ -189,7 +190,7 @@ impl Automation {
             return Err(failed(format!("windows:{r}: Windows certificate store identities are only available on Windows")));
         }
         let path = self.resolve(a.str("id")?, false)?;
-        let bytes = std::fs::read(&path).map_err(|e| failed(format!("{}: {e}", path.display())))?;
+        let bytes = crate::read_input(&path)?;
         sign::pkcs12::open(&bytes, a.opt_str("password")?.unwrap_or("")).map_err(|e| match e {
             sign::SignError::WrongPassword => bad("the digital ID password is incorrect"),
             e => failed(e),
@@ -208,7 +209,7 @@ impl Automation {
         };
         let rect = match a.nums::<4>("rect")? {
             Some(r) => {
-                let p = &doc.info.pages[page];
+                let p = doc.info.pages.get(page).ok_or_else(|| bad("the document has no page to put the signature on"))?;
                 let (u0, u1) = (p.view_to_user(r[0] as f32, r[1] as f32), p.view_to_user(r[2] as f32, r[3] as f32));
                 let u = [u0[0].min(u1[0]) as f64, u0[1].min(u1[1]) as f64, u0[0].max(u1[0]) as f64, u0[1].max(u1[1]) as f64];
                 if u[2] - u[0] < 4.0 || u[3] - u[1] < 4.0 {
@@ -320,7 +321,7 @@ impl Automation {
         };
         for p in paths {
             let path = self.resolve(&p, false)?;
-            let bytes = std::fs::read(&path).map_err(|e| failed(format!("{}: {e}", path.display())))?;
+            let bytes = crate::read_input(&path)?;
             let lower = p.to_ascii_lowercase();
             let found = if lower.ends_with(".p12") || lower.ends_with(".pfx") {
                 let id = sign::pkcs12::open(&bytes, a.opt_str("password")?.unwrap_or("")).map_err(failed)?;

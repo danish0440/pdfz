@@ -2,7 +2,7 @@ use crate::font::blob::{CffFontBlob, OpenTypeFontBlob};
 use crate::font::generated::{glyph_names, mac_os_roman, mac_roman, standard, win_ansi};
 use crate::font::standard_font::StandardKind;
 use crate::font::{
-    Encoding, FallbackFontQuery, FontFlags, glyph_name_to_unicode, read_to_unicode,
+    Encoding, FallbackFontQuery, FontFlags, glyph_name_to_text, glyph_name_to_unicode, read_to_unicode,
     strip_subset_prefix, unicode_from_name,
 };
 use crate::util::OptionLog;
@@ -18,6 +18,7 @@ use kurbo::BezPath;
 use skrifa::attribute::Style;
 use skrifa::raw::TableProvider;
 use skrifa::raw::tables::cmap::PlatformId;
+use skrifa::raw::tables::post::DEFAULT_GLYPH_NAMES;
 use skrifa::{GlyphId, MetadataProvider};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -190,10 +191,11 @@ impl TrueTypeFont {
         }
 
         match &self.kind {
-            Kind::Embedded(e) => e
-                .code_to_unicode_name(code as u8)
-                .and_then(glyph_name_to_unicode)
-                .map(BfString::Char),
+            // PdfZ patch (#3169): a name outside the glyph list reads by the glyph list
+            // specification's full mapping (`f_i`, `hyphen.case`).
+            Kind::Embedded(e) => e.code_to_unicode_name(code as u8).and_then(|name| {
+                glyph_name_to_unicode(name).map(BfString::Char).or_else(|| glyph_name_to_text(name))
+            }),
             Kind::Standard(s) => s.char_code_to_unicode(code as u8).map(BfString::Char),
         }
 
@@ -219,6 +221,9 @@ struct EmbeddedKind {
     cached_mappings: RefCell<HashMap<u8, GlyphId>>,
     /// PostScript name from the PDF.
     postscript_name: Option<String>,
+    /// PdfZ patch (101): whether the font may take the Mac OS Roman reading at all, worked out
+    /// once when it is loaded (`EmbeddedKind::mac_roman_name`).
+    mac_roman_eligible: bool,
 }
 
 impl EmbeddedKind {
@@ -246,6 +251,27 @@ impl EmbeddedKind {
             .get::<Name<'_>>(BASE_FONT)
             .map(|n| strip_subset_prefix(n.as_str()).to_string());
 
+        // PdfZ patch (101): the font names no base encoding, not even one this reader doesn't
+        // know (which `read_encoding` reads as the built-in one), and isn't Symbol or ZapfDingbats,
+        // whose built-in encodings aren't Latin (ISO 32000-2 §9.6.6.1). Both as the editor's
+        // `unicode_map` decides them, Symbol and ZapfDingbats recognised by name as there.
+        let names_base_encoding = dict.get::<Name<'_>>(ENCODING).is_some()
+            || dict
+                .get::<Dict<'_>>(ENCODING)
+                .is_some_and(|d| d.get::<Name<'_>>(BASE_ENCODING).is_some());
+        let symbolic_builtin = dict.get::<Name<'_>>(BASE_FONT).is_some_and(|n| {
+            let name = n.as_str();
+            let flat: String = name
+                .rsplit('+')
+                .next()
+                .unwrap_or(name)
+                .chars()
+                .filter(char::is_ascii_alphanumeric)
+                .map(|c| c.to_ascii_lowercase())
+                .collect();
+            flat.contains("symbol") || flat.contains("zapf") || flat.contains("dingbat")
+        });
+
         Some(Self {
             base_font,
             differences,
@@ -257,6 +283,7 @@ impl EmbeddedKind {
             encoding,
             cached_mappings: RefCell::new(HashMap::new()),
             postscript_name,
+            mac_roman_eligible: !names_base_encoding && !symbolic_builtin,
         })
     }
 
@@ -290,6 +317,8 @@ impl EmbeddedKind {
             // `Encoding::text_alias`.
             .or_else(|| self.encoding.text_alias(code))
             .or_else(|| self.encoding.map_code(code))
+            // PdfZ patch (101): see `EmbeddedKind::mac_roman_name`.
+            .or_else(|| self.mac_roman_name(code))
             // The last resort reads the code as WinAnsi whatever the font said, so it takes the
             // same aliasing.
             .or_else(|| Encoding::WinAnsi.text_alias(code))
@@ -359,26 +388,36 @@ impl EmbeddedKind {
                 }
             }
         } else if let Ok(cmap) = self.base_font.font_ref().cmap() {
-            for record in cmap.encoding_records() {
-                if record.platform_id() == PlatformId::Windows
-                    && matches!(record.encoding_id(), 0 | 1)
-                {
-                    if let Ok(subtable) = record.subtable(cmap.offset_data()) {
-                        for offset in [0x0000_u32, 0xF000, 0xF100, 0xF200] {
-                            glyph = glyph
-                                .or_else(|| subtable.map_codepoint(code as u32 + offset))
-                                .filter(|g| *g != GlyphId::NOTDEF);
-                        }
+            // PdfZ patch (#4156): the Windows (3, 0) subtable comes first, and the (1, 0) one
+            // only for codes it doesn't map (ISO 32000-2 §9.6.5.4: "If the font contains a (3, 0)
+            // subtable" it is used; "Otherwise, if the font contains a (1, 0) subtable"). The
+            // records are listed by platform ID, so Macintosh came before Windows and a wrong
+            // (1, 0) table, as SAS writes for its AMT fonts, drew "8" as "p" and "+" as "V".
+            for windows_pass in [true, false] {
+                for record in cmap.encoding_records() {
+                    let windows = record.platform_id() == PlatformId::Windows
+                        && matches!(record.encoding_id(), 0 | 1);
+                    if windows != windows_pass {
+                        continue;
                     }
-                } else if matches!(
-                    record.platform_id(),
-                    PlatformId::Macintosh | PlatformId::Unicode
-                ) && record.encoding_id() == 0
-                    && let Ok(subtable) = record.subtable(cmap.offset_data())
-                {
-                    glyph = glyph
-                        .or_else(|| subtable.map_codepoint(code))
-                        .filter(|g| *g != GlyphId::NOTDEF);
+                    if windows {
+                        if let Ok(subtable) = record.subtable(cmap.offset_data()) {
+                            for offset in [0x0000_u32, 0xF000, 0xF100, 0xF200] {
+                                glyph = glyph
+                                    .or_else(|| subtable.map_codepoint(code as u32 + offset))
+                                    .filter(|g| *g != GlyphId::NOTDEF);
+                            }
+                        }
+                    } else if matches!(
+                        record.platform_id(),
+                        PlatformId::Macintosh | PlatformId::Unicode
+                    ) && record.encoding_id() == 0
+                        && let Ok(subtable) = record.subtable(cmap.offset_data())
+                    {
+                        glyph = glyph
+                            .or_else(|| subtable.map_codepoint(code))
+                            .filter(|g| *g != GlyphId::NOTDEF);
+                    }
                 }
             }
         }
@@ -387,6 +426,68 @@ impl EmbeddedKind {
         self.cached_mappings.borrow_mut().insert(code, glyph);
 
         glyph
+    }
+
+    /// PdfZ patch (101): the Mac OS Roman glyph name a code of a symbolic font without an
+    /// encoding or glyph names reads as, when two things say the code is Mac OS Roman:
+    ///
+    /// - its Macintosh Roman (1, 0) `cmap` subtable selects the glyph the code draws. ISO
+    ///   32000-2 §9.6.5.4 has single bytes "look up the associated glyph descriptions" there, and
+    ///   has a (3, 0) subtable map "the single-byte codes in the (1, 0) subtable" prepended with
+    ///   0xF0;
+    /// - the glyph sits where the standard Macintosh glyph order (the 258 names of a version 1.0
+    ///   `post` table) puts that character. Fonts distilled from Macintosh originals keep that
+    ///   order and drop the names (`post` version 3.0): pdf.js's issue2017r.pdf draws code 0x88
+    ///   with glyph 106, `agrave`, Mac OS Roman 0x88.
+    ///
+    /// The second test is needed: Windows subsets in the same order carry a (1, 0) subtable too,
+    /// but their codes are WinAnsi (code 0x92 draws glyph 183, `quoteright`, not Mac OS Roman's
+    /// `iacute`), and reading every such code as Mac OS Roman turned "USDA’s" into "USDAís".
+    /// A font that names its glyphs in its `post` table needn't keep the order (a Wingdings subset
+    /// draws code 0x83 with glyph 101, `Eacute` in the order, which it names `threesans`).
+    /// `None` when the font is non-symbolic, names a base encoding (one this reader doesn't know
+    /// too), is Symbol or ZapfDingbats (whose
+    /// built-in encodings aren't Latin, ISO 32000-2 §9.6.6.1; recognised by name as the editor's
+    /// `unicode_map` recognises them), is a CFF program, names its glyphs, or either test fails
+    /// (SAS's AMT fonts carry a wrong (1, 0) table, #4156): the code then reads as before. Glyph
+    /// selection is unchanged.
+    fn mac_roman_name(&self, code: u8) -> Option<&'static str> {
+        if self.is_non_symbolic()
+            || !self.mac_roman_eligible
+            || !matches!(self.encoding, Encoding::BuiltIn)
+            || self.cff_blob.is_some()
+            || !self.glyph_names.is_empty()
+        {
+            return None;
+        }
+        let glyph = self.map_code(code);
+        if glyph == GlyphId::NOTDEF {
+            return None;
+        }
+        let cmap = self.base_font.font_ref().cmap().ok()?;
+        let mac = cmap.encoding_records().iter().find_map(|record| {
+            if record.platform_id() == PlatformId::Macintosh && record.encoding_id() == 0 {
+                record
+                    .subtable(cmap.offset_data())
+                    .ok()?
+                    .map_codepoint(code)
+            } else {
+                None
+            }
+        })?;
+        if mac != glyph {
+            return None;
+        }
+        let standard = match *DEFAULT_GLYPH_NAMES.get(usize::try_from(glyph.to_u32()).ok()?)? {
+            // The order's name for Mac OS Roman 0xCA; the tables here call it `nbspace`.
+            "nonbreakingspace" => "nbspace",
+            name => name,
+        };
+        let name = mac_os_roman::get(code).or_else(|| mac_roman::get(code))?;
+        if name != standard {
+            return None;
+        }
+        Encoding::MacRoman.text_alias(code).or(Some(name))
     }
 
     fn glyph_width(&self, code: u8) -> f32 {

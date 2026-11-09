@@ -110,6 +110,19 @@ impl Scale {
         }
         Self::new(real_distance / length, unit, precision)
     }
+    /// A scale as a plan writes it: `page` `page_unit` on the page is `real` `unit` in the real
+    /// world ("1 mm = 50 mm" at 1:50). `a` and `b` are the user-space ends of one display point,
+    /// as for [`Scale::calibrate`]. The page side is converted to points, so the stored factors
+    /// stay per user-space unit; the ratio string keeps the units as entered.
+    pub fn ratio(a: Point, b: Point, page: f64, page_unit: PageUnit, real: f64, unit: &str, precision: u8) -> Result<Self> {
+        if !page.is_finite() || page <= 0.0 || !real.is_finite() || real <= 0.0 {
+            return Err(invalid("both sides of a scale ratio must be finite and positive"));
+        }
+        let mut out = Self::calibrate(a, b, real / (page * page_unit.points()), unit, precision)?;
+        out.ratio = format!("{} {} = {} {unit}", ratio_number(page), page_unit.label(), ratio_number(real));
+        out.validate()?;
+        Ok(out)
+    }
     pub fn validate(&self) -> Result<()> {
         for f in [self.x, self.y, self.distance_factor, self.area_factor] {
             if !f.is_finite() || !(1e-12..=1e12).contains(&f) {
@@ -201,6 +214,44 @@ impl Scale {
         out.validate()?;
         Ok(out)
     }
+}
+/// The unit of the page side of a scale ratio. The PDF keeps scales per user-space unit
+/// (ISO 32000-2 §12.9), so a ratio given in one of these is converted to points.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PageUnit {
+    Pt,
+    In,
+    Mm,
+    Cm,
+}
+impl PageUnit {
+    pub const ALL: [Self; 4] = [Self::Pt, Self::In, Self::Mm, Self::Cm];
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Pt => "pt",
+            Self::In => "in",
+            Self::Mm => "mm",
+            Self::Cm => "cm",
+        }
+    }
+    pub fn from_label(s: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|u| u.label() == s.trim())
+    }
+    /// Points in one of this unit.
+    pub fn points(self) -> f64 {
+        match self {
+            Self::Pt => 1.0,
+            Self::In => 72.0,
+            Self::Mm => 72.0 / 25.4,
+            Self::Cm => 72.0 / 2.54,
+        }
+    }
+}
+/// A side of a scale ratio as people write it: at most six decimals, no trailing zeros.
+fn ratio_number(v: f64) -> String {
+    let fixed = format!("{v:.6}");
+    let short = fixed.trim_end_matches('0').trim_end_matches('.');
+    if short == "0" || short.len() > 24 { format!("{v:e}") } else { short.into() }
 }
 pub(crate) fn check_points(points: &[Point]) -> Result<()> {
     if points.len() > MAX_POINTS || points.iter().flatten().any(|v| !v.is_finite() || v.abs() > MAX_COORD) {
@@ -397,12 +448,39 @@ pub struct Unsupported {
 pub struct Listing {
     pub measurements: Vec<Measurement>,
     pub unsupported: Vec<Unsupported>,
-    /// The annotation limit stopped enumeration early.
+    /// The annotation or retained-size limit stopped enumeration early.
     pub truncated: bool,
 }
 const MAX_ANNOTATIONS: usize = 100_000;
-fn read_measurement(doc: &Document, d: &Dict, kind: Kind, page: usize, index: usize) -> Result<Measurement> {
-    let scale = Scale::read(doc, d.get(b"Measure").ok_or_else(|| invalid("measurement has no scale"))?)?;
+/// Vertex pairs one listing compares for self-intersection in all: an area's boundary check
+/// is quadratic in its vertices, and many areas (or many annotations sharing one indirect vertex
+/// array) must not multiply that into a stall.
+const MAX_LISTED_WORK: usize = 50_000_000;
+/// Scales already read by one listing, by the indirect `/Measure` object: one scale shared by
+/// many annotations is read (and its ratio decoded) once, failures included.
+type Scales = std::collections::HashMap<ObjRef, std::result::Result<Scale, String>>;
+/// Points and text one listing keeps, as counted by [`retained`]: about a thousand
+/// measurements of [`MAX_POINTS`] points each.
+const MAX_LISTED_BYTES: usize = 32 << 20;
+/// The bytes a listed measurement keeps in points and text.
+fn retained(m: &Measurement) -> usize {
+    let s = &m.scale;
+    [m.id.len(), m.author.len(), m.label.len(), s.unit.len(), s.area_unit.len(), s.ratio.len()]
+        .into_iter()
+        .fold(m.points.len().saturating_mul(std::mem::size_of::<Point>()), usize::saturating_add)
+}
+/// The scale a measurement annotation reads with, through the listing's cache: a scale given by
+/// reference is read once, and its error kept, however many annotations name it.
+fn scale_of(doc: &Document, d: &Dict, scales: &mut Scales) -> Result<Scale> {
+    let measure = d.get(b"Measure").ok_or_else(|| invalid("measurement has no scale"))?;
+    match measure.as_ref() {
+        Some(r) => scales.entry(r).or_insert_with(|| Scale::read(doc, measure).map_err(|e| e.to_string())).clone().map_err(|e| invalid(&e)),
+        None => Scale::read(doc, measure),
+    }
+}
+
+fn read_measurement(doc: &Document, d: &Dict, kind: Kind, page: usize, index: usize, scales: &mut Scales) -> Result<Measurement> {
+    let scale = scale_of(doc, d, scales)?;
     let key = if kind == Kind::Distance { &b"L"[..] } else { b"Vertices" };
     let o = doc.resolve(d.get(key).ok_or_else(|| invalid("measurement has no vertices"))?);
     let a = o.as_array().ok_or_else(|| invalid("invalid measurement vertices"))?;
@@ -420,6 +498,10 @@ fn read_measurement(doc: &Document, d: &Dict, kind: Kind, page: usize, index: us
 pub fn list(doc: &Document) -> Listing {
     let mut out = Listing::default();
     let mut count = 0usize;
+    let mut kept = 0usize;
+    let mut work = 0usize;
+    let mut seen = std::collections::HashSet::new();
+    let mut scales = Scales::new();
     for (page, p) in pdfz_model::pages(doc).iter().enumerate() {
         let Some(o) = p.dict.get(b"Annots") else { continue };
         let o = doc.resolve(o);
@@ -430,6 +512,12 @@ pub fn list(doc: &Document) -> Listing {
                 out.truncated = true;
                 return out;
             }
+            // One annotation object under several entries or pages is one measurement.
+            if let Some(r) = a.as_ref()
+                && !seen.insert(r)
+            {
+                continue;
+            }
             let o = doc.resolve(a);
             let Some(d) = o.as_dict() else { continue };
             let kind = match d.name(b"IT") {
@@ -438,14 +526,52 @@ pub fn list(doc: &Document) -> Listing {
                 Some(b"PolygonDimension") => Kind::Area,
                 _ => continue,
             };
-            match read_measurement(doc, d, kind, page, index) {
-                Ok(m) => out.measurements.push(m),
+            // An area's boundary check compares every pair of edges: charge it before reading the
+            // vertices, so a listing stops at its work bound rather than at a stall. Other kinds
+            // read their vertices once.
+            let vertices = d.get(if kind == Kind::Distance { b"L".as_slice() } else { b"Vertices" }).map(|v| doc.resolve(v));
+            let n = vertices.as_deref().and_then(Object::as_array).map_or(0, |a| a.len() / 2).min(MAX_POINTS);
+            // An area's boundary check compares every pair of edges: charge it before reading the
+            // vertices, so a listing stops at its work bound rather than at a stall. The scale is
+            // resolved first, as `read_measurement` reads it: one that is rejected reads nothing at
+            // all, so it must not spend the work that later, valid measurements need.
+            if kind == Kind::Area {
+                if let Err(e) = scale_of(doc, d, &mut scales) {
+                    out.unsupported.push(Unsupported { page, index, reason: e.to_string() });
+                    continue;
+                }
+                work = work.saturating_add(n.saturating_mul(n));
+            } else {
+                work = work.saturating_add(n.max(1));
+            }
+            if work > MAX_LISTED_WORK {
+                out.truncated = true;
+                return out;
+            }
+            match read_measurement(doc, d, kind, page, index, &mut scales) {
+                Ok(m) => {
+                    kept = kept.saturating_add(retained(&m));
+                    if kept > MAX_LISTED_BYTES {
+                        out.truncated = true;
+                        return out;
+                    }
+                    out.measurements.push(m);
+                }
                 Err(e) => out.unsupported.push(Unsupported { page, index, reason: e.to_string() }),
             }
         }
     }
     out
 }
+/// Most viewports [`set_scale`] gives a page, and most [`scale_at`] reads.
+const MAX_VIEWPORTS: usize = 1024;
+
+#[cfg(test)]
+thread_local! {
+    /// Numbers read from viewport `/BBox` arrays.
+    pub(crate) static VIEWPORT_NUMBERS_READ: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
 /// Last containing viewport wins, using the first point of the measurement (ISO 32000-2 §12.9).
 /// Outside every viewport the page measures true size in inches.
 pub fn scale_at(doc: &Document, page_index: usize, at: Point) -> Result<Scale> {
@@ -459,12 +585,17 @@ pub fn scale_at_or(doc: &Document, page_index: usize, at: Point, per_point: f64,
     if let Some(o) = p.dict.get(b"VP") {
         let o = doc.resolve(o);
         let arr = o.as_array().ok_or_else(|| invalid("invalid page viewports"))?;
-        for viewport in arr.iter().rev() {
+        // The last viewports win; a page holds at most MAX_VIEWPORTS of its own.
+        for viewport in arr.iter().rev().take(MAX_VIEWPORTS) {
             let o = doc.resolve(viewport);
             let Some(d) = o.as_dict() else { continue };
             if let Some(bbox) = d.get(b"BBox") {
                 let o = doc.resolve(bbox);
-                let b: Option<Vec<f64>> = o.as_array().and_then(|a| a.iter().map(|v| doc.resolve(v).as_f64()).collect());
+                let b: Option<Vec<f64>> = o.as_array().filter(|a| a.len() == 4).and_then(|a| {
+                    #[cfg(test)]
+                    VIEWPORT_NUMBERS_READ.with(|n| n.set(n.get() + a.len()));
+                    a.iter().map(|v| doc.resolve(v).as_f64()).collect()
+                });
                 if let Some(b) = b.filter(|b| b.len() == 4 && b.iter().all(|v| v.is_finite()))
                     && at[0] >= b[0].min(b[2])
                     && at[0] <= b[0].max(b[2])
@@ -490,7 +621,7 @@ pub fn set_scale(doc: &mut Document, page_index: usize, bbox: [f64; 4], name: &s
         Some(o) => doc.resolve(o).as_array().cloned().ok_or_else(|| invalid("invalid page viewports"))?,
         None => Vec::new(),
     };
-    if list.len() >= 1024 {
+    if list.len() >= MAX_VIEWPORTS {
         return Err(invalid("page has too many measurement viewports"));
     }
     let mut d = Dict::new();
