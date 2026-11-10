@@ -10,7 +10,13 @@ workspace = true
 
 [dependencies]
 craft-print = { workspace = true }
+log = { workspace = true }
 pdfz-cos = { workspace = true }
 pdfz-content = { workspace = true }
 pdfz-model = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+pdfz-render = { workspace = true }
+# Reads the renamed programs back with a parser that isn't ours.
+skrifa = "0.44"
