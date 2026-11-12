@@ -1,0 +1,74 @@
+[
+  {
+    "crate": "pdfz-cli",
+    "name": "hyper",
+    "reachable": true,
+    "path": "pdfz-cli -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper"
+  },
+  {
+    "crate": "pdfz-cli",
+    "name": "reqwest",
+    "reachable": true,
+    "path": "pdfz-cli -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest"
+  },
+  {
+    "crate": "pdfz-cli",
+    "name": "socket2",
+    "reachable": true,
+    "path": "pdfz-cli -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper-util -> socket2"
+  },
+  {
+    "crate": "pdfz-cli",
+    "name": "tokio",
+    "reachable": true,
+    "path": "pdfz-cli -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> tokio"
+  },
+  {
+    "crate": "pdfz-automation",
+    "name": "hyper",
+    "reachable": true,
+    "path": "pdfz-automation -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper"
+  },
+  {
+    "crate": "pdfz-automation",
+    "name": "reqwest",
+    "reachable": true,
+    "path": "pdfz-automation -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest"
+  },
+  {
+    "crate": "pdfz-automation",
+    "name": "socket2",
+    "reachable": true,
+    "path": "pdfz-automation -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper-util -> socket2"
+  },
+  {
+    "crate": "pdfz-automation",
+    "name": "tokio",
+    "reachable": true,
+    "path": "pdfz-automation -> pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> tokio"
+  },
+  {
+    "crate": "pdfz-engine",
+    "name": "hyper",
+    "reachable": true,
+    "path": "pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper"
+  },
+  {
+    "crate": "pdfz-engine",
+    "name": "reqwest",
+    "reachable": true,
+    "path": "pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest"
+  },
+  {
+    "crate": "pdfz-engine",
+    "name": "socket2",
+    "reachable": true,
+    "path": "pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> hyper-util -> socket2"
+  },
+  {
+    "crate": "pdfz-engine",
+    "name": "tokio",
+    "reachable": true,
+    "path": "pdfz-engine -> pdfz-print -> craft-print -> winprint -> reqwest -> tokio"
+  }
+]
