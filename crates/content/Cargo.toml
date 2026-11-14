@@ -10,3 +10,6 @@ workspace = true
 
 [dependencies]
 pdfz-cos = { workspace = true }
+# The renderer's content tokenizer, already in the tree through pdfz-cos: inline images end
+# where the renderer ends them.
+hayro-syntax = { workspace = true }
