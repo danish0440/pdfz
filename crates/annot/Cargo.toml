@@ -11,6 +11,8 @@ workspace = true
 [dependencies]
 pdfz-cos = { workspace = true }
 pdfz-fonts = { workspace = true }
+# The usable-quad rule `/QuadPoints` readers share.
+pdfz-geom = { workspace = true }
 pdfz-model = { workspace = true }
 thiserror = { workspace = true }
 
