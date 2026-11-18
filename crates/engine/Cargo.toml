@@ -10,8 +10,9 @@ workspace = true
 
 [dependencies]
 craft-docpath = { workspace = true }
+craft-image-codecs = { workspace = true }
 pdfz-measure = { workspace = true }
-image = { version = "0.25", default-features = false, features = ["png", "jpeg", "tiff"] }
+image = { version = "0.25", default-features = false }
 pdfz-render = { workspace = true }
 pdfz-cos = { workspace = true }
 pdfz-organize = { workspace = true }
@@ -19,6 +20,7 @@ pdfz-annot = { workspace = true }
 pdfz-forms = { workspace = true }
 pdfz-xfa = { workspace = true }
 pdfz-edit = { workspace = true }
+pdfz-content = { workspace = true }
 pdfz-audit = { workspace = true }
 pdfz-redact = { workspace = true }
 pdfz-print = { workspace = true }
@@ -36,10 +38,6 @@ pdfz-create = { workspace = true }
 pdfz-model = { workspace = true }
 pdfz-geom = { workspace = true }
 thiserror = { workspace = true }
-png = "0.18"
-# Already in the graph (through image and pdfz-create): image's TiffEncoder can't set the
-# resolution or the compression of an exported page.
-tiff = "0.11"
 # Already in the graph (url and idna through webbrowser, icu_properties through boa): they show
 # the host of a document's link the way the browser reads it (links::display_host).
 url = "2.5"
@@ -48,5 +46,18 @@ icu_properties = "2.3"
 unicode-segmentation = "1.13"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# Already in the graph through lopdf; used only for the local UTC offset ("today").
-chrono = { version = "0.4", default-features = false, features = ["clock"] }
+# Already in the graph through lopdf; used only for the local UTC offset ("today"). The workspace
+# entry is std-only; this target adds `clock` for `chrono::Local::now`.
+chrono = { workspace = true, features = ["clock"] }
+getrandom = "0.4"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.4", features = ["wasm_js"] }
+
+[dev-dependencies]
+# Synthetic printer profiles for the app-managed print colour tests.
+craft-cms = { workspace = true }
+craft-tiff = { workspace = true }
+pdfz-testkit = { workspace = true }
+# JBIG2 fixtures (`encode_jbig2_generic`).
+pdfz-filters = { workspace = true }
