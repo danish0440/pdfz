@@ -14,17 +14,22 @@
 use std::io::{BufRead, Write};
 
 use base64::Engine as _;
+use craft_jsonrpc::{RpcError, error_response, process_legacy};
+use craft_mcp_server::{Incoming, read_message};
 use serde_json::{Value, json};
 
 use crate::{Automation, Content, ToolError};
 
 /// Protocol revisions we speak, newest first.
-pub const PROTOCOL_VERSIONS: &[&str] = &["2025-06-18", "2025-03-26", "2024-11-05"];
+pub use craft_mcp_server::SUPPORTED_VERSIONS as PROTOCOL_VERSIONS;
 
 const PARSE_ERROR: i64 = -32700;
-const INVALID_REQUEST: i64 = -32600;
 const METHOD_NOT_FOUND: i64 = -32601;
 const INVALID_PARAMS: i64 = -32602;
+const INTERNAL_ERROR: i64 = -32603;
+
+/// Longest JSON-RPC request line [`McpServer::serve`] buffers into memory (16 MiB).
+pub const MAX_LINE_BYTES: usize = 16 * 1024 * 1024;
 
 const INSTRUCTIONS: &str = "PdfZ edits PDFs. Open a file with doc_open to get a document id, then inspect \
 (doc_info, text_extract, text_find, page_render) or edit it (page_*, doc_set_info). Edits are undoable \
@@ -83,14 +88,15 @@ impl McpServer {
     }
 
     /// Serve until `input` reaches end of file.
-    pub fn serve(&mut self, input: impl BufRead, mut output: impl Write) -> std::io::Result<()> {
-        for line in input.lines() {
-            let line = line?;
-            if line.trim().is_empty() {
-                continue;
-            }
-            if let Some(reply) = self.handle_line(&line) {
-                writeln!(output, "{reply}")?;
+    pub fn serve(&mut self, mut input: impl BufRead, mut output: impl Write) -> std::io::Result<()> {
+        while let Some(incoming) = read_message(&mut input, MAX_LINE_BYTES)? {
+            let reply = match incoming {
+                Incoming::Line(line) => self.handle_line(&line),
+                Incoming::Refused(reply) => Some(reply),
+            };
+            if let Some(reply) = reply {
+                output.write_all(reply.as_bytes())?;
+                output.write_all(b"\n")?;
                 output.flush()?;
             }
         }
@@ -99,28 +105,27 @@ impl McpServer {
 
     /// Handle one JSON-RPC message; returns the serialized reply, if one is due.
     pub fn handle_line(&mut self, line: &str) -> Option<String> {
+        let line = line.trim();
+        if line.is_empty() {
+            return None;
+        }
         let reply = match serde_json::from_str::<Value>(line) {
             Ok(msg) => self.handle(&msg),
-            Err(e) => Some(error(Value::Null, PARSE_ERROR, &format!("parse error: {e}"))),
+            Err(e) => Some(error_response(Value::Null, RpcError::new(PARSE_ERROR, format!("parse error: {e}")))),
         };
         reply.map(|r| r.to_string())
     }
 
     /// Handle one parsed message. Notifications (no `id`) get no reply.
     pub fn handle(&mut self, msg: &Value) -> Option<Value> {
-        let Some(obj) = msg.as_object() else { return Some(error(Value::Null, INVALID_REQUEST, "expected a JSON-RPC request object")) };
-        let id = obj.get("id").cloned();
-        let Some(method) = obj.get("method").and_then(Value::as_str) else {
-            // A response to something we sent (we send no requests) or garbage.
-            return id.map(|id| error(id, INVALID_REQUEST, "missing method"));
-        };
-        let params = obj.get("params").cloned().unwrap_or(Value::Null);
-        let id = id?; // notifications/initialized, notifications/cancelled, …: nothing to answer
-        let result = if method == "tools/call" { guarded_tool(|| self.dispatch(method, &params)) } else { self.dispatch(method, &params) };
-        Some(match result {
-            Ok(result) => json!({ "jsonrpc": "2.0", "id": id, "result": result }),
-            Err((code, message)) => error(id, code, &message),
-        })
+        process_legacy(
+            msg,
+            |req| {
+                let params = req.params.cloned().unwrap_or(Value::Null);
+                guarded_dispatch(req.method, || self.dispatch(req.method, &params)).map_err(|(code, message)| RpcError::new(code, message))
+            },
+            |_| {},
+        )
     }
 
     fn dispatch(&mut self, method: &str, params: &Value) -> Result<Value, (i64, String)> {
@@ -328,6 +333,15 @@ fn guarded_tool(f: impl FnOnce() -> Result<Value, (i64, String)>) -> Result<Valu
     pdfz_engine::guard(f).unwrap_or_else(|message| Ok(tool_error(&format!("internal error: {message}"))))
 }
 
+/// Last-resort boundary for every JSON-RPC method: tool calls report panics in the tool result
+/// (`isError: true`), while resource and protocol methods report a JSON-RPC internal error.
+fn guarded_dispatch(method: &str, f: impl FnOnce() -> Result<Value, (i64, String)>) -> Result<Value, (i64, String)> {
+    if method == "tools/call" {
+        return guarded_tool(f);
+    }
+    pdfz_engine::guard(f).unwrap_or_else(|message| Err((INTERNAL_ERROR, format!("internal error: {message}"))))
+}
+
 fn tool_content(name: &str, content: Vec<Content>) -> Value {
     let failed = matches!(name, "command_batch" | "doc_batch")
         && content.iter().any(|c| match c {
@@ -469,17 +483,13 @@ impl McpServer {
     }
 }
 
-fn error(id: Value, code: i64, message: &str) -> Value {
-    json!({ "jsonrpc": "2.0", "id": id, "error": { "code": code, "message": message } })
-}
-
 fn tool_json(t: &crate::ToolDef) -> Value {
     json!({
         "name": t.name,
         "title": t.title,
         "description": t.description,
         "inputSchema": t.input_schema,
-        "annotations": { "title": t.title, "readOnlyHint": t.read_only, "destructiveHint": t.destructive, "idempotentHint": t.read_only || matches!(t.name, "doc_save" | "doc_optimize" | "doc_export_data" | "measure_export" | "doc_export_images" | "doc_export_office" | "doc_export_all_images" | "doc_export_text" | "image_save"), "openWorldHint": false },
+        "annotations": { "title": t.title, "readOnlyHint": t.read_only, "destructiveHint": t.destructive, "idempotentHint": t.read_only || matches!(t.name, "doc_save" | "doc_optimize" | "doc_export_data" | "measure_export" | "doc_export_images" | "doc_export_office" | "doc_export_all_images" | "doc_export_text" | "image_save" | "bookmark_export"), "openWorldHint": false },
     })
 }
 
@@ -509,7 +519,12 @@ fn call_result(content: Vec<Content>) -> Value {
 
 #[cfg(test)]
 mod tests {
-    use super::{Resource, first_sentence, parse_uri};
+    use std::io::{BufReader, Read as _};
+
+    use serde_json::{Value, json};
+
+    use super::{McpServer, Resource, first_sentence, parse_uri};
+    use crate::Automation;
 
     #[test]
     fn conventions_panic_is_a_tool_error() {
@@ -518,6 +533,38 @@ mod tests {
         assert!(r["content"][0]["text"].as_str().unwrap().contains("synthetic tool failure"));
         let next = super::guarded_tool(|| Ok(serde_json::json!({"ok":true}))).unwrap();
         assert_eq!(next["ok"], true);
+    }
+
+    #[test]
+    fn guarded_dispatch_catches_resource_and_protocol_panics() {
+        for method in ["resources/read", "resources/list", "resources/templates/list", "initialize"] {
+            let (code, msg) = super::guarded_dispatch(method, || panic!("synthetic {method} failure")).unwrap_err();
+            assert_eq!(code, -32603, "{method}");
+            assert!(msg.contains(&format!("synthetic {method} failure")), "{msg}");
+        }
+        let ok = super::guarded_dispatch("resources/list", || Ok(json!({"resources": []}))).unwrap();
+        assert_eq!(ok["resources"], json!([]));
+    }
+
+    #[test]
+    fn serve_answers_non_utf8_and_overlong_lines_and_keeps_serving() {
+        let init = json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": { "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": { "name": "test", "version": "0" } }
+        })
+        .to_string();
+        let tail = format!("\n{init}\n");
+        let stream = (&b"\xff\n"[..]).chain(std::io::repeat(b'a').take(64 * 1024 * 1024)).chain(tail.as_bytes());
+        let mut out = Vec::new();
+        McpServer::new(Automation::new()).serve(BufReader::new(stream), &mut out).unwrap();
+        let replies: Vec<Value> = String::from_utf8(out).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
+        assert_eq!(replies.len(), 3, "{replies:?}");
+        assert_eq!(replies[0]["error"]["code"], -32700);
+        assert_eq!(replies[1]["error"]["code"], -32600);
+        assert_eq!(replies[2]["id"], 1);
+        assert_eq!(replies[2]["result"]["serverInfo"]["name"], "pdfz");
     }
 
     #[test]
