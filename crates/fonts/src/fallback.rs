@@ -156,8 +156,7 @@ impl Substitution {
 fn script_for(ordering: &str) -> Option<&'static str> {
     match ordering {
         "Japan1" => Some("Jpan"),
-        // Registered orderings we have no openly licensed face for. AGENTS.md 1.1 rules out
-        // Source Han and Noto CJK (Source Han rebranded), which is why these have none.
+        // Registered orderings the chain maps to no craft-fonts face.
         "GB1" | "CNS1" | "Korea1" | "KR" => Some(""),
         _ => None,
     }
@@ -173,8 +172,8 @@ pub fn substitute(req: &Request<'_>) -> Substitution {
     }
     if let Some((f, how)) = Std14::recognise(req.base_font) {
         return match how {
-            crate::std14::Match::Alias => at(Face::Standard14(f), Why::NamedStandard14),
-            crate::std14::Match::FamilyHint => at(Face::Standard14(f), Why::NameHintedStandard14),
+            crate::Std14Match::Alias => at(Face::Standard14(f), Why::NamedStandard14),
+            crate::Std14Match::FamilyHint => at(Face::Standard14(f), Why::NameHintedStandard14),
         };
     }
     if let Some(f) = crate::embedding::matching_faces(req.base_font).first() {
