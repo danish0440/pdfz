@@ -11,6 +11,7 @@ workspace = true
 [dependencies]
 pdfz-content = { workspace = true }
 pdfz-cos = { workspace = true }
+pdfz-model = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
