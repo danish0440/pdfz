@@ -1,0 +1,329 @@
+{
+  "id": "pdfz",
+  "name": "PdfZ",
+  "upgradeCode": "EA00C367-7270-4C50-9D8B-A7A5C88AD27F",
+  "sources": [
+    "pdfz.wxs",
+    "installer-ui.wxs"
+  ],
+  "icon": "assets/app-icon/pdfz.ico",
+  "localization": [],
+  "extensions": [],
+  "payloads": [
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "LICENSE-document.txt",
+    "NOTICE",
+    "pdfz-cli.exe",
+    "pdfz.exe"
+  ],
+  "registry": [
+    [
+      "-1",
+      "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\pdfz.exe",
+      "",
+      "[#PdfzExe]"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\PdfZ.Document",
+      "",
+      "PDF Document"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\PdfZ.Document\\DefaultIcon",
+      "",
+      "\"[#PdfzExe]\",-2"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\PdfZ.Document\\shell\\open\\command",
+      "",
+      "\"[#PdfzExe]\" \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\PdfZ.Document",
+      "TypeOverlay",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\.pdf\\OpenWithProgids",
+      "PdfZ.Document",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\pdfz.exe",
+      "FriendlyAppName",
+      "PdfZ"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\pdfz.exe\\DefaultIcon",
+      "",
+      "\"[#PdfzExe]\",-2"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\pdfz.exe\\SupportedTypes",
+      ".pdf",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\pdfz.exe\\shell\\open\\command",
+      "",
+      "\"[#PdfzExe]\" \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Capabilities",
+      "ApplicationName",
+      "PdfZ"
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Capabilities",
+      "ApplicationDescription",
+      "Open-source PDF workbench"
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Capabilities",
+      "ApplicationIcon",
+      "[#PdfzExe],0"
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Capabilities\\FileAssociations",
+      ".pdf",
+      "PdfZ.Document"
+    ],
+    [
+      "-1",
+      "Software\\RegisteredApplications",
+      "PdfZ",
+      "Software\\PdfZ\\Capabilities"
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Shortcuts",
+      "StartMenu",
+      "#1"
+    ],
+    [
+      "-1",
+      "Software\\PdfZ\\Shortcuts",
+      "Desktop",
+      "#1"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.pdf\\shell\\PdfZ.Edit",
+      "",
+      "Edit with PdfZ"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.pdf\\shell\\PdfZ.Edit",
+      "Icon",
+      "\"[#PdfzExe]\",0"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.pdf\\shell\\PdfZ.Edit",
+      "MultiSelectModel",
+      "Document"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.pdf\\shell\\PdfZ.Edit\\command",
+      "",
+      "\"[#PdfzExe]\" \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.png\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.png\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.png\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpg\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpg\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpg\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpeg\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpeg\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpeg\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tif\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tif\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tif\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tiff\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tiff\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.tiff\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.gif\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.gif\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.gif\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.bmp\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.bmp\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.bmp\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jp2\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jp2\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jp2\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.j2k\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.j2k\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.j2k\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpx\\shell\\PdfZ.CreatePdf",
+      "",
+      "Create PDF with PdfZ\u2026"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpx\\shell\\PdfZ.CreatePdf",
+      "MultiSelectModel",
+      "Single"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\SystemFileAssociations\\.jpx\\shell\\PdfZ.CreatePdf\\command",
+      "",
+      "\"[#PdfzExe]\" --create-images \"%1\""
+    ]
+  ],
+  "mode": "dualScope"
+}
